@@ -1,6 +1,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
+#MS 코드의 task.py와 같은 코드입니다.
+#11.24 규리: line 285, 291에 있는 make_dataloader()까지는 한국어 버전으로 구현된 상황입니다.
+
 from utils.base_trainer import BaseTrainer
 from utils import get_device
 from utils.tensor import clip_batch
