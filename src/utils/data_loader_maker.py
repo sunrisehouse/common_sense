@@ -243,10 +243,10 @@ class DataLoaderMaker:
     
     def _load_data_korKG(self, file_name, append_answer_text=False, append_descr=False, append_triple=True):
         examples = []
-        if type == 'json':
-            for json_obj in self._load_json(file_name):
-                example = korKGExample.load_from_json(json_obj, append_answer_text, append_descr, append_triple)
-                examples.append(example)
+        
+        for json_obj in self._load_json(file_name):
+            example = korKGExample.load_from_json(json_obj, append_answer_text, append_descr, append_triple)
+            examples.append(example)
 
         return examples
     
