@@ -19,7 +19,7 @@ tokenizer = BertTokenizerFast.from_pretrained("kykim/albert-kor-base")
 
 data_loader_maker = DataLoaderMaker()
 dataloader = data_loader_maker.make(
-    '../data/train_data.json',
+    './data/korqa_train_v1.json',
     tokenizer,
     batch_size,
     drop_last,
@@ -27,6 +27,7 @@ dataloader = data_loader_maker.make(
     append_answer_text,
     append_descr,
     append_tripple,
+    shuffle = False
 )
 
 ```
