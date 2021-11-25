@@ -6,11 +6,12 @@
 
 ```python
 
-from utils.data_loader_maker import DataLoaderMaker
+from src.utils.data_loader_maker import DataLoaderMaker
 from transformers import BertTokenizerFast
 
 batch_size = 4
 max_seq_length = 128
+drop_last = False
 append_answer_text = 1
 append_descr = 1
 append_tripple = True

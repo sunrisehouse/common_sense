@@ -156,6 +156,7 @@ class DataLoaderMaker:
             append_descr=append_descr,
             append_triple=append_triple
         )
+        print('examples: ', examples)
 
         F = []
         L = []
