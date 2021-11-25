@@ -7,13 +7,14 @@
 ```python
 
 from utils.data_loader_maker import DataLoaderMaker
+from transformers import BertTokenizerFast
 
-tokenizer = BertTokenizerFast.from_pretrained("kykim/albert-kor-base")
 batch_size = 4
 max_seq_length = 128
 append_answer_text = 1
 append_descr = 1
 append_tripple = True
+tokenizer = BertTokenizerFast.from_pretrained("kykim/albert-kor-base")
 
 data_loader_maker = DataLoaderMaker()
 dataloader = data_loader_maker.make(
