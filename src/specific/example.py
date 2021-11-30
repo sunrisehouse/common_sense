@@ -54,7 +54,7 @@ class korKGExample:
             else:
                 question_text = json_obj['question']['stem']
             if append_descr == 1:
-                context = json_obj['question']['context'][:300]
+                context = json_obj['question']['context'][:200]
                 triples_temp = '{} [SEP] {} [SEP] {}'.format(first_triple, context, following_triple)
             
             text = ' {} [SEP] {} '.format(question_text, triples_temp)
