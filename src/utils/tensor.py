@@ -1,13 +1,13 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
+
+
 from pdb import set_trace
-
-
 from .feature import Feature
 
 import torch
 from torch.utils.data import DataLoader, RandomSampler, TensorDataset
-from pdb import set_trace
+
 
 def clip_batch(batch):
     """
@@ -20,21 +20,19 @@ def clip_batch(batch):
     while True:
         end_flag = False
         for i in range(batch_size):
-            #if input_ids[i, 0, -1] != 0:
-            if input_ids[i, -1] != 0:
+            if input_ids[i, 0, -1] != 0:
                 end_flag = True
-            # if input_ids[i, 1, -1] != 0:
-            #     end_flag = True
-            #
+            if input_ids[i, 1, -1] != 0:
+                end_flag = True 
+        
         if end_flag:
             break
         else:
-            input_ids = input_ids[:, :-1]
-            # input_ids = input_ids[:, :, :-1]
-
-    max_seq_length = input_ids.size(1)#2
-    attention_mask = attention_mask[:, :max_seq_length]
-    token_type_ids = token_type_ids[:, :max_seq_length]
+            input_ids = input_ids[:, :, :-1]
+    
+    max_seq_length = input_ids.size(2)
+    attention_mask = attention_mask[:, :, :max_seq_length]
+    token_type_ids = token_type_ids[:, :, :max_seq_length]
     
     return idx, input_ids, attention_mask, token_type_ids, labels
 
@@ -42,9 +40,11 @@ def convert_to_tensor(data, batch_size, drop_last, shuffle):
     tensors = []
 
     for item in data:
-        # item: (F, L)
-        # item[0] = F: [utils.feature.Feature object, utils.feature.Feature object, ...]
-        # item[1] = L: tensor([0, 0, 1, 0, 0 ...])  --> each one-hot label
+        # item: (f, f, f, ...)
+        # item: ((f1, f2, f3), ...)
+        # item: (int, int, int, ...)
+        # item: ((int, int, int), ...)
+        # item: ((float, float, float), ...)
         if type(item[0]) is Feature:
             _tensors = _convert_feature_to_tensor(item)
             tensors.extend(_tensors)
@@ -68,14 +68,6 @@ def convert_to_tensor(data, batch_size, drop_last, shuffle):
 
         else:
             raise Exception(str(type(item[0])))
-
-    # Total Dataset num: 303284
-
-    # tensors[0].shape : torch.Size([303284])  --> Question type: 관련 question id
-    # tensors[1].shape: torch.Size([303284, 128]) --> Input ids
-    # tensors[2].shape: torch.Size([303284, 128]) --> Input mask
-    # tensors[3].shape: torch.Size([303284, 128]) --> Segment ids
-    # tensors[4].shape: torch.Size([303284]) --> label: 0(not answer), 1(answer)
 
     dataset = TensorDataset(*tensors)
 

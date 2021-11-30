@@ -1,9 +1,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-import numpy as np
-from pdb import set_trace
 from utils.tensor import convert_to_tensor
+
 
 def make_dataloader(task, *args, **kwargs):
     if task == 'kor_common':
@@ -13,15 +12,11 @@ def _make_dataloader_korkg(examples, tokenizer, batch_size, drop_last, max_seq_l
     F = []
     L = []
 
-    for i, example in enumerate(examples):
-        features, la = example.fl(tokenizer, max_seq_length)
+    for example in examples:
+        f1, f2, f3, f4, f5, la = example.fl(tokenizer, max_seq_length)
 
-        one_hot = np.zeros(shape = (len(features), ), dtype=np.int8)
-        one_hot = one_hot.tolist()
-        one_hot[int(la)-1] = 1
-
-        F.extend(features)
-        L.extend(one_hot)
+        F.append((f1, f2, f3, f4, f5))
+        L.append(la)
 
     return convert_to_tensor((F, L), batch_size, drop_last, shuffle=shuffle)
  

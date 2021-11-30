@@ -154,6 +154,77 @@ class Kor_QA():
             self.squad_contexts = pickle.load(f)
         f.close()
 
+    def same_foramt_json_v2(self, n):
+
+        for i, title in enumerate(self.squad_titles):
+            new_data = {}
+            new_data['initial_id'] = i
+            new_data['question'] = {}
+            new_data['question']['question_concept'] = title
+            new_data['question']['choices'] = []
+            new_data['question']['stem'] = self.squad_questions[i]
+            new_data['question']['context'] = self.squad_contexts[i]
+            triples = self.kg[title]
+
+            tmp_choices = []
+            for triple in triples:
+                triple_choice = {}
+                relation = triple[0]
+                tail = triple[1]
+                triple_choice['text'] = tail
+                triple_choice['triple'] = [[title, relation, tail]]
+                if str(tail) == str(self.squad_answers[i]):
+                    triple_choice['label'] = 'ans'
+                tmp_choices.append(triple_choice)
+            random.shuffle(tmp_choices)
+
+            for i, choice in enumerate(tmp_choices):
+                if 'label' in choice:
+                    if choice['label'] == 'ans':
+                        new_data['question']['choices'].append(choice)
+                else:
+                    if len(new_data['question']['choices']) < n-1:
+                        choice["label"] = "n_ans"
+                        new_data['question']['choices'].append(choice)
+                if len(new_data['question']['choices']) == n:
+                    break
+            
+            while len(new_data['question']['choices']) != n:
+                triple_choice = {}
+                ran = random.randint(0, len(self.squad_answers)-1)
+                triple_choice['text'] = self.squad_answers[ran]
+                triple_choice["label"] = "n_ans"
+                triple_choice['triple'] = [[title, 'none', triple_choice['text']]]
+                new_data['question']['choices'].append(triple_choice)
+ 
+            l_list = [i for i in range(1, n+1)]
+            random.shuffle(l_list)
+ 
+            tmp = []
+            for i, choice in enumerate(new_data['question']['choices']):
+                if choice['label'] == 'ans':
+                    new_data['answerKey'] = l_list[i]
+                choice["label"] = l_list[i]
+
+            new_data['question']['choices'] = sorted(new_data['question']['choices'], key=lambda d: d['label'])
+
+            self.all_data.append(new_data)
+
+        train_num = int(len(self.all_data) * 0.7)
+        train_data = self.all_data[:train_num]
+        dev_data = self.all_data[train_num: train_num + 2500]
+        test_data = self.all_data[train_num + 2500 :]
+
+        with open('data/korqa_train_'+str(n)+'.json', 'w', encoding = 'utf-8') as f:
+            json.dump(train_data, f)
+        f.close()
+        with open('data/korqa_dev_'+str(n)+'.json', 'w', encoding = 'utf-8') as f:
+            json.dump(dev_data, f)
+        f.close()
+        with open('data/korqa_test_'+str(n)+'.json', 'w', encoding = 'utf-8') as f:
+            json.dump(test_data, f)
+        f.close()
+
     def same_foramt_json_v1(self):
         num_choices_max = 0
         num_choices_min = 17
@@ -221,4 +292,4 @@ class Kor_QA():
 #squad.process_kg()
 #squad.augment_kg()
 kor_qa = Kor_QA()
-kor_qa.same_foramt_json_v1()
+kor_qa.same_foramt_json_v2(10)

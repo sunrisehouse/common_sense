@@ -1,9 +1,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-#MS 코드의 task.py와 같은 코드입니다.
-#11.24 규리: line 285, 291에 있는 make_dataloader()까지는 한국어 버전으로 구현된 상황입니다.
-
 from utils.base_trainer import BaseTrainer
 from utils import get_device
 from utils.tensor import clip_batch
@@ -101,15 +98,15 @@ class SelectReasonableText:
         self.config = config
 
     def init(self, ModelClass):
-        gpu_ids =  list(map(int, self.config.gpu_ids.split(',')))
+        gpu_ids = list(map(int, self.config.gpu_ids.split(',')))
         multi_gpu = (len(gpu_ids) > 1)
         device = get_device(gpu_ids)
         print('init_model', self.config.bert_model_dir)
         model = ModelClass.from_pretrained(self.config.bert_model_dir, cache_dir=args.cache_dir, no_att_merge=self.config.no_att_merge).cuda()
         print(model)
-        # if multi_gpu:
-        #     model = nn.DataParallel(model)
-        self.model = model#.cuda()
+        #if multi_gpu:
+        #    model = nn.DataParallel(model)
+        self.model = model
         self.trainer = Trainer(
             model, multi_gpu, device,
             self.config.print_step, self.config.output_model_dir, self.config.fp16)
@@ -139,9 +136,8 @@ class SelectReasonableText:
             self.model.eval()
             batch_labels = batch[4] if self.config.predict_dev else torch.zeros_like(batch[4])
             with torch.no_grad():
-
                 all_ret = self.model(batch[0],batch[1],batch[2],batch[3],batch_labels)
-                # all_ret = self.model(batch[0].cuda(),batch[1].cuda(),batch[2].cuda(),batch[3].cuda(),batch_labels.cuda())
+                #all_ret = self.model(batch[0].cuda(),batch[1].cuda(),batch[2].cuda(),batch[3].cuda(),batch_labels.cuda())
                 ret = all_ret[3]
                 idx.extend(batch[0].cpu().numpy().tolist())
                 result.extend(ret.cpu().numpy().tolist())
@@ -158,7 +154,7 @@ def get_args():
     parser.add_argument('--num_train_epochs', type=int, default=10)
     parser.add_argument('--warmup_proportion', type=float, default=0.1)
     parser.add_argument('--weight_decay', type=float, default=0.1)
-    parser.add_argument('--max_seq_length', type=int, default=128)
+    parser.add_argument('--max_seq_length', type=int, default=64)
     parser.add_argument('--freeze_lm_epochs', type=int, default=0, help='freeze LM (ALBERT) until the end of this epoch (epoch number starts at 1). No freezing if =0 (default).')
     parser.add_argument('--no_att_merge',action='store_true', help='do not do attention merge, just use CLS.')
 
@@ -215,15 +211,12 @@ def get_args():
 
 
 if __name__ == '__main__':
-    ###jinus 11/30 ###
     import time
     start = time.time()
     print("start is {}".format(start))
     import random
     import numpy as np
 
-    #from transformers import AlbertTokenizer
-    #from transformers import AlbertConfig
     from transformers import BertTokenizerFast
 
     from specific.io import load_data
@@ -270,7 +263,6 @@ if __name__ == '__main__':
         print('load_data', args.trial_file_name)
         devlp_data = load_data(experiment, args.trial_file_name, type='json', append_answer_text=args.append_answer_text, 
             append_descr=args.append_descr, append_triple=(not args.no_triples))
-
     print('get dir {}'.format(args.output_model_dir))
     Path(args.output_model_dir).mkdir(exist_ok=True, parents=True)
     print('load_vocab', args.bert_vocab_dir)
