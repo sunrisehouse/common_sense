@@ -106,7 +106,7 @@ class Model(AlbertPreTrainedModel):
             h12 = outputs[0][:, 0, :]
 
         
-        # [B, H] => [B, 1] => [B, 1]
+        # [B, H]  => [B, 1]  => [B, 1]
         # logits = self.scorer(h12).view(-1, 1)
         logits = self.scorer(h12).view(-1)
         logits = F.sigmoid(logits)
