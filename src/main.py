@@ -101,15 +101,15 @@ class SelectReasonableText:
         self.config = config
 
     def init(self, ModelClass):
-        gpu_ids = list(map(int, self.config.gpu_ids.split(',')))
+        gpu_ids =  list(map(int, self.config.gpu_ids.split(',')))
         multi_gpu = (len(gpu_ids) > 1)
         device = get_device(gpu_ids)
         print('init_model', self.config.bert_model_dir)
-        model = ModelClass.from_pretrained(self.config.bert_model_dir, cache_dir=args.cache_dir, no_att_merge=self.config.no_att_merge)
+        model = ModelClass.from_pretrained(self.config.bert_model_dir, cache_dir=args.cache_dir, no_att_merge=self.config.no_att_merge).cuda()
         print(model)
-        if multi_gpu:
-            model = nn.DataParallel(model)
-        self.model = model
+        # if multi_gpu:
+        #     model = nn.DataParallel(model)
+        self.model = model#.cuda()
         self.trainer = Trainer(
             model, multi_gpu, device,
             self.config.print_step, self.config.output_model_dir, self.config.fp16)
@@ -139,7 +139,9 @@ class SelectReasonableText:
             self.model.eval()
             batch_labels = batch[4] if self.config.predict_dev else torch.zeros_like(batch[4])
             with torch.no_grad():
-                all_ret = self.model(batch[0].cuda(),batch[1].cuda(),batch[2].cuda(),batch[3].cuda(),batch_labels.cuda())
+
+                all_ret = self.model(batch[0],batch[1],batch[2],batch[3],batch_labels)
+                # all_ret = self.model(batch[0].cuda(),batch[1].cuda(),batch[2].cuda(),batch[3].cuda(),batch_labels.cuda())
                 ret = all_ret[3]
                 idx.extend(batch[0].cpu().numpy().tolist())
                 result.extend(ret.cpu().numpy().tolist())
@@ -178,7 +180,7 @@ def get_args():
 
 
     # Other parameters
-    parser.add_argument('--print_step', type=int, default=100)
+    parser.add_argument('--print_step', type=int, default=2500)
     parser.add_argument('--gpu_ids', type=str, default=None, help='default to use all gpus')
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--mission', type=str, default='train')

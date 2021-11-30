@@ -57,27 +57,30 @@ class Model(AlbertPreTrainedModel):
         """
         h1, h2: [B, H] => logits: [B, 2]
         """
-        logits1 = self.scorer(h1)
-        logits2 = self.scorer(h2)
-        logits3 = self.scorer(h3)
-        logits4 = self.scorer(h4)
-        logits5 = self.scorer(h5)
-        logits = torch.cat((logits1, logits2, logits3, logits4, logits5), dim=1)
+        logits = self.scorer(h1)
+        # logits2 = self.scorer(h2)
+        # logits3 = self.scorer(h3)
+        # logits4 = self.scorer(h4)
+        # logits5 = self.scorer(h5)
+        # logits = torch.cat((logits1, logits2, logits3, logits4, logits5), dim=1)
         return logits
 
     def forward(self, idx, input_ids, attention_mask, token_type_ids, labels):
         """
-        input_ids: [B, 5, L]
+        input_ids: [B, L]
         labels: [B, ]
         """
-        # logits: [B, 5]
+        # logits: [B, 1]
 
-        logits = self._forward(idx, input_ids, attention_mask, token_type_ids)
-        loss = F.cross_entropy(logits, labels)
-
+        logits = self._forward(idx, input_ids, attention_mask, token_type_ids)#.view(-1)
+        # loss = F.cross_entropy(logits, labels)
+        labels = labels.to(torch.float32)
+        loss = F.binary_cross_entropy_with_logits(logits, labels)
         with torch.no_grad():
-            logits = F.softmax(logits, dim=1)
-            predicts = torch.argmax(logits, dim=1)
+            # logits = F.softmax(logits, dim=1)
+            #predicts = torch.argmax(logits, dim=1)
+            predicts = torch.tensor([1 if lo > 0.5 else 0 for lo in logits] )
+            predicts = predicts.to(torch.float32).cuda()
             right_num = torch.sum(predicts == labels)
         return loss, right_num, self._to_tensor(idx.size(0), idx.device), logits
 
@@ -96,22 +99,24 @@ class Model(AlbertPreTrainedModel):
         if self.kbert:
             flat_attention_mask = self.albert.get_attention_mask()
         
-        # outputs[0]: [B*5, L, H] => [B*5, H]
+        # outputs[0]: [B*1, L, H] => [B*1, H]
         if self.do_att_merge:
             h12 = self.att_merge(outputs[0], flat_attention_mask)
         else:
             h12 = outputs[0][:, 0, :]
 
         
-        # [B*5, H] => [B*5, 1] => [B, 5]
-        logits = self.scorer(h12).view(-1, 5)
-
+        # [B, H] => [B, 1] => [B, 1]
+        # logits = self.scorer(h12).view(-1, 1)
+        logits = self.scorer(h12).view(-1)
+        logits = F.sigmoid(logits)
         return logits
 
     def predict(self, idx, input_ids, attention_mask, token_type_ids):
         """
-        return: [B, 5]
+        return: [B, 1]
         """
         return self._forward(idx, input_ids, attention_mask, token_type_ids)
 
-    def _to_tensor(self, it, device): return torch.tensor(it, device=device, dtype=torch.float)
+    def _to_tensor(self, it, device):
+        return torch.tensor(it, device=device, dtype=torch.float)
