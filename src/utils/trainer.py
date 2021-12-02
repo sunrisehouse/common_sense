@@ -5,7 +5,7 @@ from transformers.optimization import get_cosine_with_hard_restarts_schedule_wit
 from transformers.file_utils import WEIGHTS_NAME, CONFIG_NAME
 import os
 from torch.utils.tensorboard import SummaryWriter
-from . import get_device, AvgVar, Vn
+from . import Vn
 
 import logging;
 
@@ -46,49 +46,6 @@ def mkdir_if_notexist(dir_):
     dirname, filename = os.path.split(dir_)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
-
-class Trainer:
-    def __init__(self):
-        print('[trainer]')
-
-    def train(
-        self, ModelClass,
-        train_dataloader, devlp_dataloader,
-        gpu_ids,
-        bert_model_dir,
-        cache_dir,
-        no_att_merge,
-        print_step,
-        output_model_dir,
-        fp16,
-        num_train_epochs,
-        warmup_proportion,
-        weight_decay,
-        lr,
-        freeze_lm_epochs,
-    ):
-        
-        gpu_ids =  list(map(int, gpu_ids.split(',')))
-        multi_gpu = (len(gpu_ids) > 1)
-        device = get_device(gpu_ids)
-        
-        model = ModelClass.from_pretrained(bert_model_dir, cache_dir=cache_dir, no_att_merge=no_att_merge).cuda()
-        
-        trainer = ModelTrainer(
-            model, multi_gpu, device,
-            print_step, output_model_dir, fp16)
-
-        t_total = len(train_dataloader) * num_train_epochs
-
-        optimizer = trainer.make_optimizer(weight_decay, lr)
-        scheduler = trainer.make_scheduler(optimizer, warmup_proportion, t_total)
-
-        trainer.set_optimizer(optimizer)
-        trainer.set_scheduler(scheduler)
-
-        trainer.train(
-            num_train_epochs, train_dataloader, devlp_dataloader, 
-            save_last=False, freeze_lm_epochs=freeze_lm_epochs)
 
 class BaseTrainer:
     def __init__(self, model, multi_gpu, device, print_step, output_model_dir, vn):
@@ -230,11 +187,11 @@ class BaseTrainer:
         model_to_save = self.model.module if hasattr(self.model, "module") else self.model
         model_to_save.save_pretrained(self.output_model_dir)
 
-class ModelTrainer(BaseTrainer):
+class Trainer(BaseTrainer):
     def __init__(self, model, multi_gpu, device, print_step,
                  output_model_dir, fp16):
 
-        super(ModelTrainer, self).__init__(
+        super(Trainer, self).__init__(
             model, multi_gpu, device, print_step, output_model_dir, vn=3)
         self.fp16 = fp16
         self.multi_gpu = multi_gpu
