@@ -4,6 +4,8 @@ from utils.trainer import Trainer
 from utils.data_loader_maker import DataLoaderMaker
 from utils import get_device
 from model import Model
+import random
+import numpy as np
 
 def train(train_dataloader, devlp_dataloader):
     gpu_ids = None
@@ -44,6 +46,11 @@ def train(train_dataloader, devlp_dataloader):
     )
 
 if __name__ == '__main__':
+    seed = 1102
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
     batch_size = 4
     max_seq_length = 128
     drop_last = False
