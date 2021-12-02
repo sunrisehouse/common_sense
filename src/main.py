@@ -42,7 +42,6 @@ def train():
     if gpu_ids is None:
         n_gpus = torch.cuda.device_count()
         gpu_ids=','.join([str(i) for i in range(n_gpus)])
-        print('gpu_ids:', gpu_ids)
 
     fp16 = 0
     fp16 = True if fp16 == 1 else False

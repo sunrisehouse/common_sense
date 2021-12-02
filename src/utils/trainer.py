@@ -49,7 +49,7 @@ def mkdir_if_notexist(dir_):
 
 class Trainer:
     def __init__(self):
-        print('trainer')
+        print('[trainer]')
 
     def train(
         self, ModelClass,
@@ -71,9 +71,8 @@ class Trainer:
         gpu_ids =  list(map(int, gpu_ids.split(',')))
         multi_gpu = (len(gpu_ids) > 1)
         device = get_device(gpu_ids)
-        print('init_model', bert_model_dir)
+        
         model = ModelClass.from_pretrained(bert_model_dir, cache_dir=cache_dir, no_att_merge=no_att_merge).cuda()
-        print(model)
         
         trainer = ModelTrainer(
             model, multi_gpu, device,

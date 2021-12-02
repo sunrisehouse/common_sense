@@ -147,17 +147,15 @@ class Feature:
         
 class DataLoaderMaker:
     def __init__(self):
-        print("data loader maker")
+        print("[data loader maker]")
     
     def make(self, data_file_name, tokenizer, batch_size, drop_last, max_seq_length, append_answer_text, append_descr, append_triple, shuffle=True):
-        print("1111")
         examples = self._load_data_korKG(
             data_file_name,
             append_answer_text=append_answer_text, 
             append_descr=append_descr,
             append_triple=append_triple
         )
-        print('examples: ', examples)
 
         F = []
         L = []
