@@ -33,8 +33,6 @@ def get_device(gpu_ids):
     device = torch.device(device_name)
     return device
 
-
-
 def _load_json(file_name):
     with open(file_name, encoding='utf-8', mode='r') as f:
         return json.load(f)
@@ -78,7 +76,6 @@ class Vn:
 
     def list(self):
         return [v.var for v in self.vs]
-
 
 
 def set_seed(args):
