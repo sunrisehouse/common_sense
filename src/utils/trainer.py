@@ -48,8 +48,12 @@ def mkdir_if_notexist(dir_):
         os.makedirs(dirname)
 
 class Trainer:
-    def __init__(
-        self,
+    def __init__(self):
+        print('trainer')
+
+    def train(
+        self, ModelClass,
+        train_dataloader, devlp_dataloader,
         gpu_ids,
         bert_model_dir,
         cache_dir,
@@ -63,68 +67,29 @@ class Trainer:
         lr,
         freeze_lm_epochs,
     ):
-        self.gpu_ids = gpu_ids
-        self.bert_model_dir = bert_model_dir
-        self.cache_dir = cache_dir
-        self.no_att_merge = no_att_merge
-        self.print_step = print_step
-        self.output_model_dir = output_model_dir
-        self.fp16 = fp16
-        self.num_train_epochs = num_train_epochs
-        self.warmup_proportion = warmup_proportion
-        self.weight_decay = weight_decay
-        self.lr = lr
-        self.freeze_lm_epochs = freeze_lm_epochs
-
-    def train(
-        self, ModelClass,
-        train_dataloader, devlp_dataloader,
-    ):
         
-        gpu_ids =  list(map(int, self.gpu_ids.split(',')))
+        gpu_ids =  list(map(int, gpu_ids.split(',')))
         multi_gpu = (len(gpu_ids) > 1)
         device = get_device(gpu_ids)
-        print('init_model', self.bert_model_dir)
-        model = ModelClass.from_pretrained(self.bert_model_dir, cache_dir=self.cache_dir, no_att_merge=self.no_att_merge).cuda()
+        print('init_model', bert_model_dir)
+        model = ModelClass.from_pretrained(bert_model_dir, cache_dir=cache_dir, no_att_merge=no_att_merge).cuda()
         print(model)
         
         trainer = ModelTrainer(
             model, multi_gpu, device,
-            self.print_step, self.output_model_dir, self.fp16)
+            print_step, output_model_dir, fp16)
 
-        t_total = len(train_dataloader) * self.num_train_epochs
-        warmup_proportion = self.warmup_proportion
+        t_total = len(train_dataloader) * num_train_epochs
 
-        optimizer = trainer.make_optimizer(self.weight_decay, self.lr)
+        optimizer = trainer.make_optimizer(weight_decay, lr)
         scheduler = trainer.make_scheduler(optimizer, warmup_proportion, t_total)
 
         trainer.set_optimizer(optimizer)
         trainer.set_scheduler(scheduler)
 
         trainer.train(
-            self.num_train_epochs, train_dataloader, devlp_dataloader, 
-            save_last=False, freeze_lm_epochs=self.freeze_lm_epochs)
-    
-    def trial(self, dataloader, desc='Eval'):
-        result = []
-        idx = []
-        labels = []
-        predicts = []
-
-        for batch in dataloader:
-            batch = clip_batch(batch)
-            self.model.eval()
-            batch_labels = batch[4] if self.config.predict_dev else torch.zeros_like(batch[4])
-            with torch.no_grad():
-
-                all_ret = self.model(batch[0],batch[1],batch[2],batch[3],batch_labels)
-                # all_ret = self.model(batch[0].cuda(),batch[1].cuda(),batch[2].cuda(),batch[3].cuda(),batch_labels.cuda())
-                ret = all_ret[3]
-                idx.extend(batch[0].cpu().numpy().tolist())
-                result.extend(ret.cpu().numpy().tolist())
-                labels.extend(batch[4].numpy().tolist())
-                predicts.extend(torch.argmax(ret, dim=1).cpu().numpy().tolist())
-        return idx, result, labels, predicts
+            num_train_epochs, train_dataloader, devlp_dataloader, 
+            save_last=False, freeze_lm_epochs=freeze_lm_epochs)
 
 class BaseTrainer:
     def __init__(self, model, multi_gpu, device, print_step, output_model_dir, vn):

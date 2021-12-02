@@ -58,7 +58,10 @@ def train():
     lr = 1e-5
     freeze_lm_epochs = 0
 
-    trainer = Trainer(
+    trainer = Trainer()
+
+    trainer.train(
+        Model, train_dataloader, devlp_dataloader,
         gpu_ids=gpu_ids,
         bert_model_dir=bert_model_dir,
         cache_dir=cache_dir,
@@ -71,10 +74,6 @@ def train():
         weight_decay=weight_decay,
         lr=lr,
         freeze_lm_epochs=freeze_lm_epochs,
-    )
-
-    trainer.train(
-        Model, train_dataloader, devlp_dataloader,
     )
 
 if __name__ == '__main__':
