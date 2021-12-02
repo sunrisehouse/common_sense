@@ -171,7 +171,7 @@ def get_args():
 
     # Data parameters
     parser.add_argument('--append_answer_text', type=int, default=0, help='append answer text to the question.')
-    parser.add_argument('--append_descr', type=int, default=0, help='append wiktionary description.')
+    parser.add_argument('--append_descr', type=int, default=1, help='append wiktionary description.')
     parser.add_argument('--no_triples', action='store_true', help='not appending triples so we do not use ConceptNet.')
 
 

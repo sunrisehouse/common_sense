@@ -5,13 +5,18 @@ from utils.feature import Feature
 import pdb
 
 class korKGExample:
-    def __init__(self, idx, choice1, choice2, choice3, choice4, choice5, label = -1):
+    def __init__(self, idx, choice1, choice2, choice3, choice4, choice5, choice6, choice7, choice8, choice9, choice10, label = -1):
         self.idx = idx
         self.text1 = choice1
         self.text2 = choice2
         self.text3 = choice3
         self.text4 = choice4
         self.text5 = choice5
+        self.text6 = choice4
+        self.text7 = choice7
+        self.text8 = choice8
+        self.text9 = choice9
+        self.text10 = choice10
         self.label = int(label)
     
     def __str__(self):
@@ -54,7 +59,7 @@ class korKGExample:
             else:
                 question_text = json_obj['question']['stem']
             if append_descr == 1:
-                context = json_obj['question']['context'][:300]
+                context = json_obj['question']['context'][:200]
                 triples_temp = '{} [SEP] {} [SEP] {}'.format(first_triple, context, following_triple)
             
             text = ' {} [SEP] {} '.format(question_text, triples_temp)
