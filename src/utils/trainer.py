@@ -77,7 +77,7 @@ class Trainer:
         self.freeze_lm_epochs = freeze_lm_epochs
 
     def train(
-        self, ModelClass, model, multi_gpu, device,
+        self, ModelClass,
         train_dataloader, devlp_dataloader,
     ):
         

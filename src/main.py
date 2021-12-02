@@ -2,8 +2,42 @@ import torch
 from transformers import BertTokenizerFast
 from utils.trainer import Trainer
 from utils.data_loader_maker import DataLoaderMaker
+from .model import Model
 
 def train():
+    batch_size = 4
+    max_seq_length = 128
+    drop_last = False
+    append_answer_text = 1
+    append_descr = 1
+    append_tripple = True
+    tokenizer = BertTokenizerFast.from_pretrained("kykim/albert-kor-base")
+
+    data_loader_maker = DataLoaderMaker()
+    train_dataloader = data_loader_maker.make(
+        './data/korqa_train_v1.json',
+        tokenizer,
+        batch_size,
+        drop_last,
+        max_seq_length,
+        append_answer_text,
+        append_descr,
+        append_tripple,
+        shuffle = False
+    )
+
+    devlp_dataloader = data_loader_maker.make(
+        './data/korqa_dev_v1.json',
+        tokenizer,
+        batch_size,
+        drop_last,
+        max_seq_length,
+        append_answer_text,
+        append_descr,
+        append_tripple,
+        shuffle = False
+    )
+
     gpu_ids = None
     if gpu_ids is None:
         n_gpus = torch.cuda.device_count()
@@ -39,26 +73,9 @@ def train():
         freeze_lm_epochs=freeze_lm_epochs,
     )
 
-if __name__ == '__main__':
-    batch_size = 4
-    max_seq_length = 128
-    drop_last = False
-    append_answer_text = 1
-    append_descr = 1
-    append_tripple = True
-    tokenizer = BertTokenizerFast.from_pretrained("kykim/albert-kor-base")
-
-    data_loader_maker = DataLoaderMaker()
-    dataloader = data_loader_maker.make(
-        './data/korqa_train_v1.json',
-        tokenizer,
-        batch_size,
-        drop_last,
-        max_seq_length,
-        append_answer_text,
-        append_descr,
-        append_tripple,
-        shuffle = False
+    trainer.train(
+        Model, train_dataloader, devlp_dataloader,
     )
 
+if __name__ == '__main__':
     train()
