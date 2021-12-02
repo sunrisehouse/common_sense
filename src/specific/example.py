@@ -20,7 +20,7 @@ class korKGExample:
         self.label = int(label)
     
     def __str__(self):
-        return f"{self.idx} | {self.text1} | {self.text2} | {self.text3} | {self.text4} | {self.text5} | {self.label}"
+        return f"{self.idx} | {self.text1} | {self.text2} | {self.text3} | {self.text4} | {self.text5} | {self.text6} | {self.text7} | {self.text8} | {self.text9} | {self.text10} |{self.label}"
         
     def fl(self, tokenizer, max_seq_length):
         fs = self.f(tokenizer, max_seq_length)
@@ -32,13 +32,23 @@ class korKGExample:
         tokens3 = tokenizer.tokenize(self.text3)
         tokens4 = tokenizer.tokenize(self.text4)
         tokens5 = tokenizer.tokenize(self.text5)
+        tokens6 = tokenizer.tokenize(self.text6)
+        tokens7 = tokenizer.tokenize(self.text7)
+        tokens8 = tokenizer.tokenize(self.text8)
+        tokens9 = tokenizer.tokenize(self.text9)
+        tokens10 = tokenizer.tokenize(self.text10)
 
         feature1 = Feature.make_single(self.idx, tokens1, tokenizer, max_seq_length)
         feature2 = Feature.make_single(self.idx, tokens2, tokenizer, max_seq_length)
         feature3 = Feature.make_single(self.idx, tokens3, tokenizer, max_seq_length)
         feature4 = Feature.make_single(self.idx, tokens4, tokenizer, max_seq_length)
         feature5 = Feature.make_single(self.idx, tokens5, tokenizer, max_seq_length)
-        return (feature1, feature2, feature3, feature4, feature5)
+        feature6 = Feature.make_single(self.idx, tokens6, tokenizer, max_seq_length)
+        feature7 = Feature.make_single(self.idx, tokens7, tokenizer, max_seq_length)
+        feature8 = Feature.make_single(self.idx, tokens8, tokenizer, max_seq_length)
+        feature9 = Feature.make_single(self.idx, tokens9, tokenizer, max_seq_length)
+        feature10 = Feature.make_single(self.idx, tokens10, tokenizer, max_seq_length)
+        return (feature1, feature2, feature3, feature4, feature5, feature6, feature7, feature8, feature9, feature10)
         
         
     @classmethod
@@ -70,7 +80,12 @@ class korKGExample:
         text3 = mkinput(question_concept, choices[2])
         text4 = mkinput(question_concept, choices[3])
         text5 = mkinput(question_concept, choices[4])
-        
+        text6 = mkinput(question_concept, choices[5])
+        text7 = mkinput(question_concept, choices[6])
+        text8 = mkinput(question_concept, choices[7])
+        text9 = mkinput(question_concept, choices[8])
+        text10 = mkinput(question_concept, choices[9])
+
         label =  int(json_obj['answerKey']) - 1
 
         return cls(
@@ -80,6 +95,11 @@ class korKGExample:
             text3,
             text4,
             text5,
+            text6,
+            text7,
+            text8,
+            text9,
+            text10,
             label,
         )
 

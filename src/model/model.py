@@ -105,7 +105,7 @@ class Model(AlbertPreTrainedModel):
 
         
         # [B*5, H] => [B*5, 1] => [B, 5]
-        logits = self.scorer(h12).view(-1, 5)
+        logits = self.scorer(h12).view(-1, 10)
         logits = F.softmax(logits, dim = 1)
 
         return logits
