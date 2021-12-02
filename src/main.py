@@ -2,7 +2,7 @@ import torch
 from transformers import BertTokenizerFast
 from utils.trainer import Trainer
 from utils.data_loader_maker import DataLoaderMaker
-from .model import Model
+from model import Model
 
 def train():
     batch_size = 4
