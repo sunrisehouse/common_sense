@@ -31,3 +31,11 @@ dataloader = data_loader_maker.make(
 )
 
 ```
+
+### Training
+
+```python
+
+python3 src/main.py
+
+```
