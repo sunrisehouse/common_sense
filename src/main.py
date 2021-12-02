@@ -1,7 +1,7 @@
 import torch
+from transformers import BertTokenizerFast
 from .utils.trainer import Trainer
 from .utils.data_loader_maker import DataLoaderMaker
-from transformers import BertTokenizerFast
 
 def train():
     gpu_ids = None
@@ -38,8 +38,6 @@ def train():
         lr=lr,
         freeze_lm_epochs=freeze_lm_epochs,
     )
-
-    trainer.train()
 
 if __name__ == '__main__':
     batch_size = 4
