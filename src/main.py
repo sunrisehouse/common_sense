@@ -1,6 +1,6 @@
 import torch
-from src.utils.trainer import Trainer
-from src.utils.data_loader_maker import DataLoaderMaker
+from .utils.trainer import Trainer
+from .utils.data_loader_maker import DataLoaderMaker
 from transformers import BertTokenizerFast
 
 def train():
