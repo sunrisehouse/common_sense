@@ -24,21 +24,19 @@ def clip_batch(batch):
     while True:
         end_flag = False
         for i in range(batch_size):
-            #if input_ids[i, 0, -1] != 0:
-            if input_ids[i, -1] != 0:
+            if input_ids[i, 0, -1] != 0:
                 end_flag = True
-            # if input_ids[i, 1, -1] != 0:
-            #     end_flag = True
-            #
+            if input_ids[i, 1, -1] != 0:
+                end_flag = True 
+        
         if end_flag:
             break
         else:
-            input_ids = input_ids[:, :-1]
-            # input_ids = input_ids[:, :, :-1]
-
-    max_seq_length = input_ids.size(1)#2
-    attention_mask = attention_mask[:, :max_seq_length]
-    token_type_ids = token_type_ids[:, :max_seq_length]
+            input_ids = input_ids[:, :, :-1]
+    
+    max_seq_length = input_ids.size(2)
+    attention_mask = attention_mask[:, :, :max_seq_length]
+    token_type_ids = token_type_ids[:, :, :max_seq_length]
     
     return idx, input_ids, attention_mask, token_type_ids, labels
 

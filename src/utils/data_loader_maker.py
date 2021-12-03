@@ -45,7 +45,7 @@ class korKGExample:
             else:
                 question_text = json_obj['question']['stem']
             if append_descr == 1:
-                context = json_obj['question']['context'][:100]
+                context = json_obj['question']['context'][:200]
                 triples_temp = '{} [SEP] {} [SEP] {}'.format(first_triple, context, following_triple)
             
             text = ' {} [SEP] {} '.format(question_text, triples_temp)
@@ -56,10 +56,8 @@ class korKGExample:
             cmd = 'texts.append(mkinput(question_concept, choices[%d]))'%(i)
             exec(cmd)
 
-        try:
-            label =  int(json_obj['answerKey'])
-        except:
-            label = -1
+        label =  int(json_obj['answerKey']) - 1
+
         return cls(
             json_obj['initial_id'],
             texts,
@@ -144,7 +142,8 @@ class Feature:
         assert len(segment_ids) == max_seq_length
 
         return cls(idx, input_ids, input_mask, segment_ids)
-        
+
+from pdb import set_trace      
 class DataLoaderMaker:
     def __init__(self):
         print("[data loader maker]")
@@ -163,12 +162,8 @@ class DataLoaderMaker:
         for i, example in enumerate(examples):
             features, la = example.fl(tokenizer, max_seq_length)
 
-            one_hot = np.zeros(shape = (len(features), ), dtype=np.int8)
-            one_hot = one_hot.tolist()
-            one_hot[int(la)-1] = 1
-
-            F.extend(features)
-            L.extend(one_hot)
+            F.append(features)
+            L.append(la)
 
         return self.convert_to_tensor((F, L), batch_size, drop_last, shuffle=shuffle)
     
@@ -176,14 +171,17 @@ class DataLoaderMaker:
         tensors = []
 
         for item in data:
-            # item: (F, L)
-            # item[0] = F: [utils.feature.Feature object, utils.feature.Feature object, ...]
-            # item[1] = L: tensor([0, 0, 1, 0, 0 ...])  --> each one-hot label
+            # item: (f, f, f, ...)
+            # item: ((f1, f2, f3), ...)
+            # item: (int, int, int, ...)
+            # item: ((int, int, int), ...)
+            # item: ((float, float, float), ...)
+
             if type(item[0]) is Feature:
                 _tensors = self._convert_feature_to_tensor(item)
                 tensors.extend(_tensors)
 
-            elif type(item[0]) is tuple:
+            elif type(item[0]) is list:
                 if type(item[0][0]) is Feature:
                     _tensors = self._convert_multi_feature_to_tensor(item)
                     tensors.extend(_tensors)
@@ -192,24 +190,8 @@ class DataLoaderMaker:
                 _tensor = torch.tensor(item, dtype=torch.long)
                 tensors.append(_tensor)
 
-            elif type(item[0]) is list:
-                if type(item[0][0]) is int:
-                    _tensor = torch.tensor(item, dtype=torch.long)
-                elif type(item[0][0]) is float:
-                    _tensor = torch.tensor(item, dtype=torch.float)
-
-                tensors.append(_tensor)
-
             else:
                 raise Exception(str(type(item[0])))
-
-        # Total Dataset num: 303284
-
-        # tensors[0].shape : torch.Size([303284])  --> Question type: 관련 question id
-        # tensors[1].shape: torch.Size([303284, 128]) --> Input ids
-        # tensors[2].shape: torch.Size([303284, 128]) --> Input mask
-        # tensors[3].shape: torch.Size([303284, 128]) --> Segment ids
-        # tensors[4].shape: torch.Size([303284]) --> label: 0(not answer), 1(answer)
 
         dataset = TensorDataset(*tensors)
 
@@ -217,7 +199,7 @@ class DataLoaderMaker:
         dataloader = DataLoader(dataset, sampler=sampler,
                                 batch_size=batch_size, drop_last=drop_last)
         return dataloader
-    
+        
     def _convert_feature_to_tensor(self, features):
         """
         features: [f, f, f, ...]
