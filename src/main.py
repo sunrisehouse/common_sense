@@ -150,8 +150,6 @@ class SelectReasonableText:
 
     def subtask(self, dataloader, desc='Eval'):#주관식 코드
         logits = []
-
-
         for batch in dataloader:
             batch = clip_batch(batch)
             self.model.eval()
@@ -161,6 +159,10 @@ class SelectReasonableText:
 
         Answer = torch.argmax(logits)
 
+        correct_answer = ''#dataloader에서 타켓값 뽑아주시면됩니다.
+        Question = ''#마찬가지로 Question 뽑아주시면됩니다.
+        print(f"Question:{Question}\n")
+        print(f"correct_answer:{correct_answer}  model answer:{Answer}")
         return Answer
 def get_args():
     parser = argparse.ArgumentParser()
@@ -284,14 +286,12 @@ if __name__ == '__main__':
         devlp_data = load_data(experiment, args.trial_file_name, type='json', append_answer_text=args.append_answer_text, 
             append_descr=args.append_descr, append_triple=(not args.no_triples))
 
-<<<<<<< Updated upstream
-=======
+
     elif args.mission == 'subjective_task':
         print('###subjective_task###')
 
         test_data = load_data(experiment, args.trial_file_name, type='json', append_answer_text=args.append_answer_text,
             append_descr=args.append_descr, append_triple=(not args.no_triples))
->>>>>>> Stashed changes
     print('get dir {}'.format(args.output_model_dir))
     Path(args.output_model_dir).mkdir(exist_ok=True, parents=True)
     print('load_vocab', args.bert_vocab_dir)
@@ -349,28 +349,7 @@ if __name__ == '__main__':
         srt = SelectReasonableText(args)
         srt = SelectReasonableText(args)
         srt.init(Model_for_sub)
-        idx, result, label, predict = srt.trial(test_dataloader)
-
-        content = ''
-        length = len(result)
-        right = 0
-        for i, item in enumerate(tqdm(result)):
-            if predict[i] == label[i]:
-                right += 1
-            content += '{},{},{},{},{},{},{},{}\n'.format(idx[i][0], item[0], item[1], item[2], item[3], item[4],
-                                                          label[i], predict[i])
-
-        res_data = {'idx': idx, 'result': result, 'label': label, 'predict': predict}
-        logger.info("accuracy is {}".format(right / length))
-
-
-        with open(args.pred_file_name, 'w', encoding='utf-8') as f:
-            f.write(content)    
-        with open(args.pred_file_name.replace('.csv', '.json'), 'w', encoding='utf-8') as f:
-            json.dump(res_data, f)
-        with open(args.pred_file_name.replace('.csv', '_summary.json'), 'w', encoding='utf-8') as f:
-            summary_data = {'correct': right, 'total': length}
-            json.dump(summary_data, f)
+        answer = srt.subtask(test_dataloader)
 
 
 
