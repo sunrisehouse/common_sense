@@ -284,6 +284,57 @@ class Kor_QA():
         with open('data/korqa_test_v1.json', 'w', encoding = 'utf-8') as f:
             json.dump(test_data, f)
         f.close()
+        
+    def json_subjective(self):
+
+        with open('../../data/korqa_test_5.json', 'r') as f:
+            test_squad = json.load(f)
+        f.close()
+        test_squad = test_squad[:10]
+        new_test_squad = []
+
+        for i ,data in enumerate(test_squad):
+            new_data = {}
+            new_data['initial_id'] = i
+            new_data['question'] = {}
+            new_data['question']['question_concept'] = data['question']['question_concept']
+            new_data['question']['choices'] = data['question']['choices']
+            new_data['question']['stem'] = data['question']['stem']
+            new_data['question']['context'] = data['question']['context']
+            triples = self.kg[data['question']['question_concept']]
+
+            no_choice = []
+            for choice in new_data['question']['choices']:
+                no_choice.append(choice['text'])
+            
+            for k, c in enumerate(self.squad_answers):
+                triple_choice = {}
+                triple_choice['text'] = c
+                if triple_choice['text'] in no_choice and self.squad_titles[k] == new_data['question']['question_concept']:
+                    continue
+                triple_choice["label"] = "n_ans"
+                triple_choice['triple'] = [[data['question']['question_concept'], 'none', triple_choice['text']]]
+                new_data['question']['choices'].append(triple_choice)
+ 
+            l_list = [i for i in range(1, len(self.squad_answers)+1)]
+            random.shuffle(l_list)
+ 
+            tmp = []
+            print(len(new_data['question']['choices']))
+            print(len(self.squad_answers))
+            new_data['question']['choices'] = new_data['question']['choices'][:len(self.squad_answers)]
+            for j, choice in enumerate(new_data['question']['choices']):
+                if choice['label'] == data['answerKey']:
+                    new_data['answerKey'] = l_list[j]
+                choice["label"] = l_list[j]
+
+            new_data['question']['choices'] = sorted(new_data['question']['choices'], key=lambda d: d['label'])
+
+            new_test_squad.append(new_data)
+            
+        with open('../../data/subjective_data.json', 'w', encoding = 'utf-8') as f:
+            json.dump(new_test_squad, f)
+        f.close()
 
 #test = Triples()
 #parse = test.readfile('data/qa_triples/common_triples@180105.nt')
@@ -292,4 +343,4 @@ class Kor_QA():
 #squad.process_kg()
 #squad.augment_kg()
 kor_qa = Kor_QA()
-kor_qa.same_foramt_json_v2(20)
+kor_qa.json_subjective()
