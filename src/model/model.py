@@ -53,17 +53,17 @@ class Model(AlbertPreTrainedModel):
         for name, p in self.albert.named_parameters():
             p.requires_grad = self.requires_grad[p]
 
-    def score(self, h1, h2, h3, h4, h5):
-        """
-        h1, h2: [B, H] => logits: [B, 2]
-        """
-        logits1 = self.scorer(h1)
-        logits2 = self.scorer(h2)
-        logits3 = self.scorer(h3)
-        logits4 = self.scorer(h4)
-        logits5 = self.scorer(h5)
-        logits = torch.cat((logits1, logits2, logits3, logits4, logits5), dim=1)
-        return logits
+    # def score(self, h1, h2, h3, h4, h5):
+    #     """
+    #     h1, h2: [B, H] => logits: [B, 2]
+    #     """
+    #     logits1 = self.scorer(h1)
+    #     logits2 = self.scorer(h2)
+    #     logits3 = self.scorer(h3)
+    #     logits4 = self.scorer(h4)
+    #     logits5 = self.scorer(h5)
+    #     logits = torch.cat((logits1, logits2, logits3, logits4, logits5), dim=1)
+    #     return logits
 
     def forward(self, idx, input_ids, attention_mask, token_type_ids, labels):
         """
