@@ -35,7 +35,7 @@ class AttentionMerge(nn.Module):
         keys = self.hidden_layer(values)
         keys = torch.tanh(keys)
         query_var = torch.var(self.query_)
-        # (b, l, h) + (h, 1) -> (b, l, 1)
+
         attention_probs = keys @ self.query_ / math.sqrt(self.attention_size * query_var)
         attention_probs = F.softmax(attention_probs * mask, dim=1)
         attention_probs = self.dropout(attention_probs)
@@ -48,10 +48,11 @@ logger = logging.getLogger(__name__)
 class Model(AlbertPreTrainedModel):
     """
     AlBert-AttentionMerge-Classifier
+
     1. self.forward(input_ids, attention_mask, token_type_ids, label)
     2. self.predict(input_ids, attention_mask, token_type_ids)
     """
-    def __init__(self, config, no_att_merge=False):
+    def __init__(self, config, no_att_merge=False, N_choices = 5):
         super(Model, self).__init__(config)
         self.kbert = False
 
@@ -68,6 +69,7 @@ class Model(AlbertPreTrainedModel):
             nn.Dropout(0.1),
             nn.Linear(config.hidden_size, 1)
         )
+        self.n_choices = N_choices
 
         self.init_weights()
         self.requires_grad = {}
@@ -83,33 +85,18 @@ class Model(AlbertPreTrainedModel):
         for name, p in self.albert.named_parameters():
             p.requires_grad = self.requires_grad[p]
 
-    def score(self, h1, h2, h3, h4, h5):
-        """
-        h1, h2: [B, H] => logits: [B, 2]
-        """
-        logits = self.scorer(h1)
-        # logits2 = self.scorer(h2)
-        # logits3 = self.scorer(h3)
-        # logits4 = self.scorer(h4)
-        # logits5 = self.scorer(h5)
-        # logits = torch.cat((logits1, logits2, logits3, logits4, logits5), dim=1)
-        return logits
-
     def forward(self, idx, input_ids, attention_mask, token_type_ids, labels):
         """
-        input_ids: [B, L]
+        input_ids: [B, N_choices, L]
         labels: [B, ]
         """
-        # logits: [B, 1]
 
-        logits = self._forward(idx, input_ids, attention_mask, token_type_ids)#.view(-1)
-        # loss = F.cross_entropy(logits, labels)
-        labels = labels.to(torch.float32)
-        loss = F.binary_cross_entropy_with_logits(logits, labels)
+        logits = self._forward(idx, input_ids, attention_mask, token_type_ids)
+        loss = F.cross_entropy(logits, labels)
+
         with torch.no_grad():
-            # logits = F.softmax(logits, dim=1)
-            #predicts = torch.argmax(logits, dim=1)
-            predicts = torch.tensor([1 if lo > 0.5 else 0 for lo in logits] )
+            logits = F.softmax(logits, dim=1)
+            predicts = torch.argmax(logits, dim=1)
             predicts = predicts.to(torch.float32).cuda()
             right_num = torch.sum(predicts == labels)
         return loss, right_num, self._to_tensor(idx.size(0), idx.device), logits
@@ -129,24 +116,21 @@ class Model(AlbertPreTrainedModel):
         if self.kbert:
             flat_attention_mask = self.albert.get_attention_mask()
         
-        # outputs[0]: [B*1, L, H] => [B*1, H]
         if self.do_att_merge:
             h12 = self.att_merge(outputs[0], flat_attention_mask)
         else:
             h12 = outputs[0][:, 0, :]
 
-        
-        # [B, H]  => [B, 1]  => [B, 1]
-        # logits = self.scorer(h12).view(-1, 1)
-        logits = self.scorer(h12).view(-1)
-        logits = F.sigmoid(logits)
+        logits = self.scorer(h12).view(-1, self.n_choices)
+        logits = F.softmax(logits, dim = 1)
+
         return logits
 
     def predict(self, idx, input_ids, attention_mask, token_type_ids):
         """
-        return: [B, 1]
+        return: [B, N_choices]
         """
         return self._forward(idx, input_ids, attention_mask, token_type_ids)
 
-    def _to_tensor(self, it, device):
+    def _to_tensor(self, it, device): 
         return torch.tensor(it, device=device, dtype=torch.float)
