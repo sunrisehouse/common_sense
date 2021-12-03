@@ -81,8 +81,7 @@ class Trainer(BaseTrainer):
         trn, tan = train_record.list()[1:]
         drn, dan = devlp_record.list()[1:]
 
-        logger.info(f'\n____Train: loss {train_loss:.4f} {int(trn)}/{int(tan)} = {int(trn)/int(tan):.4f} |'
-              f' Devlp: loss {devlp_loss:.4f} {int(drn)}/{int(dan)} = {int(drn)/int(dan):.4f}')
+        print(f'\n____Train: loss {train_loss:.4f} {int(trn)}/{int(tan)} = {int(trn)/int(tan):.4f}  Devlp: loss {devlp_loss:.4f} {int(drn)}/{int(dan)} = {int(drn)/int(dan):.4f}')
         self.tb_writer.add_scalar("train_accuracy", int(trn)/int(tan), global_step=self.tb_step)
         self.tb_writer.add_scalar("dev_accuracy", int(drn)/int(dan), global_step=self.tb_step)
         self.tb_writer.add_scalar("train_loss", train_loss, global_step=self.tb_step)
@@ -149,6 +148,20 @@ class SelectReasonableText:
                 predicts.extend(torch.argmax(ret, dim=1).cpu().numpy().tolist())
         return idx, result, labels, predicts
 
+    def subtask(self, dataloader, desc='Eval'):#주관식 코드
+        logits = []
+
+
+        for batch in dataloader:
+            batch = clip_batch(batch)
+            self.model.eval()
+            batch_labels = batch[4] if self.config.predict_dev else torch.zeros_like(batch[4])
+            with torch.no_grad():
+                logits.append(self.model(batch[0],batch[1],batch[2],batch[3],batch_labels))
+
+        Answer = torch.argmax(logits)
+
+        return Answer
 def get_args():
     parser = argparse.ArgumentParser()
 
@@ -229,7 +242,7 @@ if __name__ == '__main__':
     from specific.io import load_data
     from pathlib import Path
     from specific.tensor import make_dataloader
-    from model.model import Model
+    from model.model import Model,Model_for_sub
     from utils.common import mkdir_if_notexist
 
     args = get_args()
@@ -271,6 +284,14 @@ if __name__ == '__main__':
         devlp_data = load_data(experiment, args.trial_file_name, type='json', append_answer_text=args.append_answer_text, 
             append_descr=args.append_descr, append_triple=(not args.no_triples))
 
+<<<<<<< Updated upstream
+=======
+    elif args.mission == 'subjective_task':
+        print('###subjective_task###')
+
+        test_data = load_data(experiment, args.trial_file_name, type='json', append_answer_text=args.append_answer_text,
+            append_descr=args.append_descr, append_triple=(not args.no_triples))
+>>>>>>> Stashed changes
     print('get dir {}'.format(args.output_model_dir))
     Path(args.output_model_dir).mkdir(exist_ok=True, parents=True)
     print('load_vocab', args.bert_vocab_dir)
@@ -295,6 +316,9 @@ if __name__ == '__main__':
             experiment, devlp_data, tokenizer, batch_size=args.batch_size,
             drop_last=False, max_seq_length=args.max_seq_length, shuffle=False)
 
+    test_dataloader = make_dataloader(
+        experiment, test_data, tokenizer, batch_size=args.batch_size,
+        drop_last=False, max_seq_length=args.max_seq_length, shuffle=False)
     print('devlp_data %d ' % len(devlp_data))
     # ------------------------------------------------#
 
@@ -321,6 +345,25 @@ if __name__ == '__main__':
 
         res_data = {'idx': idx, 'result': result, 'label': label, 'predict': predict}
         logger.info("accuracy is {}".format(right/length))
+    elif args.mission == 'subjective_task':
+        srt = SelectReasonableText(args)
+        srt = SelectReasonableText(args)
+        srt.init(Model_for_sub)
+        idx, result, label, predict = srt.trial(test_dataloader)
+
+        content = ''
+        length = len(result)
+        right = 0
+        for i, item in enumerate(tqdm(result)):
+            if predict[i] == label[i]:
+                right += 1
+            content += '{},{},{},{},{},{},{},{}\n'.format(idx[i][0], item[0], item[1], item[2], item[3], item[4],
+                                                          label[i], predict[i])
+
+        res_data = {'idx': idx, 'result': result, 'label': label, 'predict': predict}
+        logger.info("accuracy is {}".format(right / length))
+
+
         with open(args.pred_file_name, 'w', encoding='utf-8') as f:
             f.write(content)    
         with open(args.pred_file_name.replace('.csv', '.json'), 'w', encoding='utf-8') as f:
