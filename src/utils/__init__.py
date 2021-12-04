@@ -3,17 +3,8 @@
 
 import torch
 import os
-import csv
-import json
-
 import random
 import numpy as np
-
-import logging
-# logging.basicConfig(level = logging.INFO,format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-
-
 
 def mkdir_if_notexist(dir_):
     dirname, filename = os.path.split(dir_)
@@ -32,10 +23,6 @@ def get_device(gpu_ids):
     # print('!!!!!device_name=', device_name)
     device = torch.device(device_name)
     return device
-
-def _load_json(file_name):
-    with open(file_name, encoding='utf-8', mode='r') as f:
-        return json.load(f)
 
 class AvgVar:
     """
@@ -84,3 +71,35 @@ def set_seed(args):
     torch.manual_seed(args.seed)
     if args.n_gpu > 0:
         torch.cuda.manual_seed_all(args.seed)
+
+def mkdir_if_notexist(dir_):
+    dirname, filename = os.path.split(dir_)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
+def clip_batch(batch):
+    """
+    clip batch based on max length
+    """
+    # print("batch size is {}".format(len(batch[0])))
+    idx, input_ids, attention_mask, token_type_ids, labels = batch
+    # [batch_size, 2, L]
+    batch_size = input_ids.size(0)
+    while True:
+        end_flag = False
+        for i in range(batch_size):
+            if input_ids[i, 0, -1] != 0:
+                end_flag = True
+            if input_ids[i, 1, -1] != 0:
+                end_flag = True 
+        
+        if end_flag:
+            break
+        else:
+            input_ids = input_ids[:, :, :-1]
+    
+    max_seq_length = input_ids.size(2)
+    attention_mask = attention_mask[:, :, :max_seq_length]
+    token_type_ids = token_type_ids[:, :, :max_seq_length]
+    
+    return idx, input_ids, attention_mask, token_type_ids, labels

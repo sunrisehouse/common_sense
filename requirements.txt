@@ -1,3 +1,6 @@
  transformers==4.3.3
  numpy
  torch
+ rdflib
+ tqdm
+ 

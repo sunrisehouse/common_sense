@@ -13,12 +13,13 @@ def get_args():
     parser.add_argument('--max_seq_length', type=int, default=128)
 
     # Path parameters
-    parser.add_argument('--trial_file_name', type=str, default=None)
-    parser.add_argument('--pred_file_name', type=str, default=None)
+    parser.add_argument('--model_path', type=str, default='kykim/albert-kor-base')
+    parser.add_argument('--train_data_path', type=str, default=None)
+    parser.add_argument('--dev_data_path', type=str, default=None)
+    parser.add_argument('--test_data_path', type=str, default=None)
     parser.add_argument('--output_model_dir', type=str, default=None)
     parser.add_argument('--cache_dir', type=str, default=None)
-    parser.add_argument('--predict_dir', type=str, default='../Result/output/', help='directory of prediction files.')
-
+    
     # Data parameters
     parser.add_argument('--append_answer_text', type=int, default=1, help='append answer choice to the question.')
     parser.add_argument('--append_descr', type=int, default=1, help='append QA related context description.')
@@ -28,9 +29,10 @@ def get_args():
     parser.add_argument('--print_step', type=int, default=2500)
     parser.add_argument('--seed', type=int, default=1102)
     parser.add_argument('--mission', type=str, default='train')
-    parser.add_argument('--predict_dev',action='store_true', help='predict results on dev.')
+    parser.add_argument('--predict_dev', action='store_true', help='predict results on dev.')
     parser.add_argument('--fp16', type=int, default=0)
     parser.add_argument('--test_mode', action='store_true')
+
 
     args = parser.parse_args()
 

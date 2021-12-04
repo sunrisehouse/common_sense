@@ -34,8 +34,43 @@ dataloader = data_loader_maker.make(
 
 ### Training
 
-```python
+```
 
-python3 src/main.py
+python3 src/main.py \
+    --mission=train
+    --train_data_path=./data/korqa_dev_15.json \
+    --dev_data_path=./data/korqa_dev_15.json \
+    --choice_num=15 \
+    --output_model_dir=./Result \
+    --cache_dir=./Result \
 
 ```
+
+### Training From Checkpoint
+
+```
+
+python3 src/main.py \
+    --mission=train
+    --train_data_path=./data/korqa_dev_15.json \
+    --dev_data_path=./data/korqa_dev_15.json \
+    --choice_num=15 \
+    --model_path=./Result/output
+    --output_model_dir=./Result \
+    --cache_dir=./Result \
+
+```
+
+### Test
+
+```
+
+python3 src/main.py \
+    --mission=test
+    --test_data_path=./data/korqa_test_15.json \
+    --choice_num=15 \
+    --model_path=./Result/output \
+    --cache_dir=./Result \
+
+```
+

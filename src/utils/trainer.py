@@ -3,47 +3,14 @@ import torch
 from transformers.optimization import AdamW
 from transformers.optimization import get_cosine_with_hard_restarts_schedule_with_warmup
 from transformers.file_utils import WEIGHTS_NAME, CONFIG_NAME
-import os
 from torch.utils.tensorboard import SummaryWriter
-from . import Vn
+from . import Vn, clip_batch, mkdir_if_notexist
 
 import logging;
 
 logging.getLogger("transformers").setLevel(logging.WARNING)
 logging.basicConfig(level = logging.INFO,format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
-def clip_batch(batch):
-    """
-    clip batch based on max length
-    """
-    # print("batch size is {}".format(len(batch[0])))
-    idx, input_ids, attention_mask, token_type_ids, labels = batch
-    # [batch_size, 2, L]
-    batch_size = input_ids.size(0)
-    while True:
-        end_flag = False
-        for i in range(batch_size):
-            if input_ids[i, 0, -1] != 0:
-                end_flag = True
-            if input_ids[i, 1, -1] != 0:
-                end_flag = True 
-        
-        if end_flag:
-            break
-        else:
-            input_ids = input_ids[:, :, :-1]
-    
-    max_seq_length = input_ids.size(2)
-    attention_mask = attention_mask[:, :, :max_seq_length]
-    token_type_ids = token_type_ids[:, :, :max_seq_length]
-    
-    return idx, input_ids, attention_mask, token_type_ids, labels
-
-def mkdir_if_notexist(dir_):
-    dirname, filename = os.path.split(dir_)
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
 
 class BaseTrainer:
     def __init__(self, model, multi_gpu, device, print_step, output_model_dir, vn):
