@@ -36,13 +36,14 @@ class Model(AlbertPreTrainedModel):
 
         hidden_layer = 200
         self.scorer = nn.Sequential(
-            nn.Dropout(0.1),
             nn.Linear(config.hidden_size, hidden_layer),
             nn.BatchNorm1d(hidden_layer),
-            nn.ReLu(),
+            nn.ReLU(),
+            nn.Dropout(0.5),
             nn.Linear(hidden_layer, hidden_layer),
             nn.BatchNorm1d(hidden_layer),
-            nn.ReLu(),
+            nn.ReLU(),
+            nn.Dropout(0.5),
             nn.Linear(hidden_layer, 1),
         )
 
