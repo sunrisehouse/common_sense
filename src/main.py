@@ -16,7 +16,7 @@ def train(args):
     drop_last = False
     append_answer_text = args.append_answer_text
     append_descr = args.append_descr
-    append_tripple = args.append_tripple
+    append_tripple = False if args.append_descr == 0 else True
     gpu_ids = None
     if gpu_ids is None:
         n_gpus = torch.cuda.device_count()
@@ -89,9 +89,9 @@ def test(dataloader, args):
     batch_size = args.batch_size
     max_seq_length = args.max_seq_length
     drop_last = False
-    append_answer_text = args.append_answer_text
-    append_descr = args.append_descr
-    append_tripple = args.append_tripple
+    append_answer_text = 1
+    append_descr = 1
+    append_tripple = False if args.append_descr == 0 else True
     no_att_merge = False
     model_path = args.model_path
     test_data_path = args.test_data_path,
