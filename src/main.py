@@ -42,6 +42,7 @@ def train(args):
     tokenizer = BertTokenizerFast.from_pretrained("kykim/albert-kor-base")
 
     print(
+        args.train_data_path, ' ?? //',
         train_data_path, '//',
         batch_size, '//',
         drop_last, '//',
