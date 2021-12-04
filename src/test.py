@@ -13,7 +13,7 @@ def test(args):
     append_tripple = False if args.append_descr == 0 else True
     no_att_merge = False
     model_path = args.model_path
-    test_data_path = args.test_data_path,
+    test_data_path = args.test_data_path
     tokenizer = BertTokenizerFast.from_pretrained("kykim/albert-kor-base")
     cache_dir = args.cache_dir
 
