@@ -3,7 +3,7 @@ from utils.predictor import Predictor
 from utils.data_loader_maker import DataLoaderMaker
 from model import Model
 
-def test(dataloader, args):
+def test(args):
     choice_num = args.choice_num
     batch_size = args.batch_size
     max_seq_length = args.max_seq_length
