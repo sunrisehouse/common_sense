@@ -14,8 +14,9 @@ def test(args):
     no_att_merge = False
     model_path = args.model_path
     test_data_path = args.test_data_path
-    tokenizer = BertTokenizerFast.from_pretrained("kykim/albert-kor-base")
     cache_dir = args.cache_dir
+    
+    tokenizer = BertTokenizerFast.from_pretrained("kykim/albert-kor-base")
 
     data_loader_maker = DataLoaderMaker()
     dataloader = data_loader_maker.make(

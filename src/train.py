@@ -34,6 +34,7 @@ def train(args):
     device = get_device(gpu_ids)
     train_data_path = args.train_data_path
     dev_data_path = args.dev_data_path
+    
     tokenizer = BertTokenizerFast.from_pretrained("kykim/albert-kor-base")
 
     data_loader_maker = DataLoaderMaker()
