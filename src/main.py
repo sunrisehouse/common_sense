@@ -21,8 +21,7 @@ def train(args):
     if gpu_ids is None:
         n_gpus = torch.cuda.device_count()
         gpu_ids=','.join([str(i) for i in range(n_gpus)])
-    fp16 = 0
-    fp16 = True if fp16 == 1 else False
+    fp16 = True if args.fp16 == 1 else False
     model_path = args.model_path
     cache_dir = args.cache_dir
     no_att_merge = False
@@ -37,22 +36,9 @@ def train(args):
     gpu_ids = list(map(int, gpu_ids.split(',')))
     multi_gpu = (len(gpu_ids) > 1)
     device = get_device(gpu_ids)
-    train_data_path = args.train_data_path,
+    train_data_path = args.train_data_path
     dev_data_path = args.dev_data_path
     tokenizer = BertTokenizerFast.from_pretrained("kykim/albert-kor-base")
-
-    print(
-        args.train_data_path, ' ?? //',
-        train_data_path, '//',
-        args.dev_data_path, '//',
-        dev_data_path, '//',
-        batch_size, '//',
-        drop_last, '//',
-        max_seq_length, '//',
-        append_answer_text, '//',
-        append_descr, '//',
-        append_tripple, '//',
-    )
 
     data_loader_maker = DataLoaderMaker()
     train_dataloader = data_loader_maker.make(

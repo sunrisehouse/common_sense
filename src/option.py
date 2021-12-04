@@ -31,7 +31,6 @@ def get_args():
     parser.add_argument('--mission', type=str, default='train')
     parser.add_argument('--predict_dev', action='store_true', help='predict results on dev.')
     parser.add_argument('--fp16', type=int, default=0)
-    parser.add_argument('--test_mode', action='store_true')
 
 
     args = parser.parse_args()
