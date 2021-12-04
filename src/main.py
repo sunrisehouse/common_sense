@@ -44,6 +44,8 @@ def train(args):
     print(
         args.train_data_path, ' ?? //',
         train_data_path, '//',
+        args.dev_data_path, '//',
+        dev_data_path, '//',
         batch_size, '//',
         drop_last, '//',
         max_seq_length, '//',
