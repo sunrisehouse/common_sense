@@ -33,10 +33,17 @@ class Model(AlbertPreTrainedModel):
         self.do_att_merge = not no_att_merge
         self.att_merge = AttentionMerge(
             config.hidden_size, 1024, 0.1) if self.do_att_merge else None
-        
+
+        hidden_layer = 200
         self.scorer = nn.Sequential(
             nn.Dropout(0.1),
-            nn.Linear(config.hidden_size, 1)
+            nn.Linear(config.hidden_size, hidden_layer),
+            nn.BatchNorm1d(hidden_layer),
+            nn.ReLu(),
+            nn.Linear(hidden_layer, hidden_layer),
+            nn.BatchNorm1d(hidden_layer),
+            nn.ReLu(),
+            nn.Linear(hidden_layer, 1),
         )
 
         self.init_weights()
@@ -53,17 +60,6 @@ class Model(AlbertPreTrainedModel):
         for name, p in self.albert.named_parameters():
             p.requires_grad = self.requires_grad[p]
 
-    # def score(self, h1, h2, h3, h4, h5):
-    #     """
-    #     h1, h2: [B, H] => logits: [B, 2]
-    #     """
-    #     logits1 = self.scorer(h1)
-    #     logits2 = self.scorer(h2)
-    #     logits3 = self.scorer(h3)
-    #     logits4 = self.scorer(h4)
-    #     logits5 = self.scorer(h5)
-    #     logits = torch.cat((logits1, logits2, logits3, logits4, logits5), dim=1)
-    #     return logits
 
     def forward(self, idx, input_ids, attention_mask, token_type_ids, labels):
         """
