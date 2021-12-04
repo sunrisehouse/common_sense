@@ -15,7 +15,7 @@ def test(args):
     model_path = args.model_path
     test_data_path = args.test_data_path
     cache_dir = args.cache_dir
-    
+
     tokenizer = BertTokenizerFast.from_pretrained("kykim/albert-kor-base")
 
     data_loader_maker = DataLoaderMaker()
@@ -34,4 +34,4 @@ def test(args):
     model = Model.from_pretrained(model_path, cache_dir=cache_dir, no_att_merge=no_att_merge, N_choices = choice_num).cuda()
 
     predictor = Predictor()
-    predictor.predict(Model, model, dataloader)
+    predictor.predict(model, dataloader)
