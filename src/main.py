@@ -42,14 +42,13 @@ def train(args):
     tokenizer = BertTokenizerFast.from_pretrained("kykim/albert-kor-base")
 
     print(
-        train_data_path,
-        tokenizer,
-        batch_size,
-        drop_last,
-        max_seq_length,
-        append_answer_text,
-        append_descr,
-        append_tripple,
+        train_data_path, '//',
+        batch_size, '//',
+        drop_last, '//',
+        max_seq_length, '//',
+        append_answer_text, '//',
+        append_descr, '//',
+        append_tripple, '//',
     )
 
     data_loader_maker = DataLoaderMaker()
