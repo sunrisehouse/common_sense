@@ -27,6 +27,8 @@ def train(args):
     warmup_proportion = args.warmup_proportion
     weight_decay = args.weight_decay
     choice_num = args.choice_num
+    scorer_hidden = args.scorer_hidden
+    version = args.model_version
     lr = args.lr
     freeze_lm_epochs = 0
     gpu_ids = list(map(int, gpu_ids.split(',')))
@@ -62,7 +64,7 @@ def train(args):
         shuffle = False
     )
 
-    model = Model.from_pretrained(model_path, cache_dir=cache_dir, no_att_merge=no_att_merge, N_choices = choice_num).cuda()
+    model = Model.from_pretrained(model_path, cache_dir=cache_dir, no_att_merge=no_att_merge, N_choices = choice_num, scorer_hidden = scorer_hidden, version = version ).cuda()
 
     trainer = Trainer(
         model, multi_gpu, device,

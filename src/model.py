@@ -52,7 +52,7 @@ class Model(AlbertPreTrainedModel):
     1. self.forward(input_ids, attention_mask, token_type_ids, label)
     2. self.predict(input_ids, attention_mask, token_type_ids)
     """
-    def __init__(self, config, no_att_merge=False, N_choices = 5):
+    def __init__(self, config, no_att_merge=False, N_choices = 5, version = 1,scorer_hidden = 100):
         super(Model, self).__init__(config)
         self.kbert = False
 
@@ -65,18 +65,26 @@ class Model(AlbertPreTrainedModel):
         self.att_merge = AttentionMerge(
             config.hidden_size, 1024, 0.1) if self.do_att_merge else None
 
-        hidden_layer = 100
-        self.scorer = nn.Sequential(
-            nn.Linear(config.hidden_size, hidden_layer),
-            nn.BatchNorm1d(hidden_layer),
-            nn.ReLU(),
-            nn.Dropout(0.7),
-            nn.Linear(hidden_layer, hidden_layer),
-            nn.BatchNorm1d(hidden_layer),
-            nn.ReLU(),
-            nn.Dropout(0.7),
-            nn.Linear(hidden_layer, 1),
-        )
+
+        if version == 1:
+            self.scorer = nn.Sequential(
+                nn.Linear(config.hidden_size, scorer_hidden),
+                nn.BatchNorm1d(scorer_hidden),
+                nn.ReLU(),
+                nn.Dropout(0.3),
+                nn.Linear(scorer_hidden, 1),
+            )
+        elif version == 2:
+            self.scorer = nn.Sequential(
+                nn.Linear(config.hidden_size, scorer_hidden),
+                nn.BatchNorm1d(scorer_hidden),
+                nn.ReLU(),
+                nn.Dropout(0.5),
+                nn.BatchNorm1d(scorer_hidden),
+                nn.ReLU(),
+                nn.Dropout(0.5),
+                nn.Linear(scorer_hidden, 1),
+            )
 
         self.n_choices = N_choices
 

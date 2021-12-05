@@ -18,7 +18,6 @@ class Predictor():
             model.eval()
             batch_labels = batch[4]
             with torch.no_grad():
-                # all_ret = model(batch[0],batch[1],batch[2],batch[3],batch_labels)
                 all_ret = model(batch[0].cuda(),batch[1].cuda(),batch[2].cuda(),batch[3].cuda(),batch_labels.cuda())
                 ret = all_ret[3]
                 idx.extend(batch[0].cpu().numpy().tolist())

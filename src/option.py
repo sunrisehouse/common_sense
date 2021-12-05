@@ -5,6 +5,8 @@ def get_args():
 
     # Training parameters
     parser.add_argument('--choice_num', type=int, default=5)
+    parser.add_argument('--scorer_hidden', type=int, default=100)
+    parser.add_argument('--model_version', type=int, default=1)
     parser.add_argument('--lr', type=float, default=1e-5)
     parser.add_argument('--batch_size', type=int, default=4)
     parser.add_argument('--num_train_epochs', type=int, default=10)
