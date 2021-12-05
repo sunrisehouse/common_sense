@@ -85,6 +85,11 @@ class Model(AlbertPreTrainedModel):
                 nn.Dropout(0.5),
                 nn.Linear(scorer_hidden, 1),
             )
+        elif version == 3:
+            self.scorer = nn.Sequential(
+                nn.Dropout(0.1),
+                nn.Linear(config.hidden_size, 1),
+            )
 
         self.n_choices = N_choices
 
