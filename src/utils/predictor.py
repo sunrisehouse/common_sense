@@ -26,3 +26,5 @@ class Predictor():
                 labels.extend(batch[4].numpy().tolist())
                 predicts.extend(torch.argmax(ret, dim=1).cpu().numpy().tolist())
         return idx, result, labels, predicts
+
+

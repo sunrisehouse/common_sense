@@ -64,11 +64,20 @@ class Model(AlbertPreTrainedModel):
         self.do_att_merge = not no_att_merge
         self.att_merge = AttentionMerge(
             config.hidden_size, 1024, 0.1) if self.do_att_merge else None
-        
+
+        hidden_layer = 100
         self.scorer = nn.Sequential(
-            nn.Dropout(0.1),
-            nn.Linear(config.hidden_size, 1)
+            nn.Linear(config.hidden_size, hidden_layer),
+            nn.BatchNorm1d(hidden_layer),
+            nn.ReLU(),
+            nn.Dropout(0.7),
+            nn.Linear(hidden_layer, hidden_layer),
+            nn.BatchNorm1d(hidden_layer),
+            nn.ReLU(),
+            nn.Dropout(0.7),
+            nn.Linear(hidden_layer, 1),
         )
+
         self.n_choices = N_choices
 
         self.init_weights()

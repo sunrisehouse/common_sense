@@ -2,7 +2,7 @@ from transformers import BertTokenizerFast
 from utils.predictor import Predictor
 from utils.data_loader_maker import DataLoaderMaker
 from model import Model
-
+from tqdm.autonotebook import tqdm
 def test(args):
     choice_num = args.choice_num
     batch_size = args.batch_size
@@ -34,4 +34,15 @@ def test(args):
     model = Model.from_pretrained(model_path, cache_dir=cache_dir, no_att_merge=no_att_merge, N_choices = choice_num).cuda()
 
     predictor = Predictor()
-    predictor.predict(model, dataloader)
+    idx, result, label, predict = predictor.predict(model, dataloader)
+    content = ''
+    length = len(result)
+    right = 0
+    for i, item in enumerate(tqdm(result)):
+        if predict[i] == label[i]:
+            right += 1
+        content += '{},{},{},{},{},{},{},{}\n'.format(idx[i][0], item[0], item[1], item[2], item[3], item[4], label[i],
+                                                      predict[i])
+
+    res_data = {'idx': idx, 'result': result, 'label': label, 'predict': predict}
+    print("accuracy is {}".format(right / length))
