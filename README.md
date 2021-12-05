@@ -25,6 +25,8 @@ python3 src/main.py \
     --train_data_path=./data/korqa_train_15.json \
     --dev_data_path=./data/korqa_dev_15.json \
     --choice_num=15 \
+    --model_version=1 \
+    --scorer_hidden=100 \
     --model_path=./Result/output \
     --output_model_dir=./Result/output \
     --cache_dir=./Result/cache \
@@ -37,6 +39,8 @@ python3 src/main.py \
 
 python3 src/main.py \
     --mission=test \
+    --model_version=1 \
+    --scorer_hidden=100 \
     --test_data_path=./data/korqa_test_15.json \
     --choice_num=15 \
     --model_path=./Result/output/pjw.0 \
