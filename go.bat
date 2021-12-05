@@ -1,0 +1,1 @@
+python src/main.py --mission=test --test_data_path=./data/korqa_test_10.json --choice_num=10 --model_path=./Result/output/ --cache_dir=./Result/cache

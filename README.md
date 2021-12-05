@@ -39,7 +39,7 @@ python3 src/main.py \
     --mission=test \
     --test_data_path=./data/korqa_test_15.json \
     --choice_num=15 \
-    --model_path=./Result/output \
+    --model_path=./Result/output/pjw.0 \
     --cache_dir=./Result/cache \
 
 ```

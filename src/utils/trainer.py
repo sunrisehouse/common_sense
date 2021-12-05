@@ -150,7 +150,7 @@ class BaseTrainer:
         mkdir_if_notexist(self.output_model_dir)
         logger.info('saving model {}'.format(self.output_model_dir))
         model_to_save = self.model.module if hasattr(self.model, "module") else self.model
-        model_to_save.save_pretrained(self.output_model_dir)
+        # model_to_save.save_pretrained(self.output_model_dir)
 
 class Trainer(BaseTrainer):
     def __init__(self, model, multi_gpu, device, print_step,
