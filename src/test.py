@@ -5,6 +5,8 @@ from model import Model
 from tqdm.autonotebook import tqdm
 def test(args):
     choice_num = args.choice_num
+    scorer_hidden = args.scorer_hidden
+    version = args.model_version
     batch_size = args.batch_size
     max_seq_length = args.max_seq_length
     drop_last = False
@@ -31,7 +33,7 @@ def test(args):
         shuffle = False
     )
 
-    model = Model.from_pretrained(model_path, cache_dir=cache_dir, no_att_merge=no_att_merge, N_choices = choice_num).cuda()
+    model = Model.from_pretrained(model_path, cache_dir=cache_dir, no_att_merge=no_att_merge, N_choices = choice_num, scorer_hidden = scorer_hidden, version = version).cuda()
 
     predictor = Predictor()
     idx, result, label, predict = predictor.predict(model, dataloader)
