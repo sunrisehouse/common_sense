@@ -43,8 +43,8 @@ def test(args):
     for i, item in enumerate(tqdm(result)):
         if predict[i] == label[i]:
             right += 1
-    #     content += '{},{},{},{},{},{},{},{}\n'.format(idx[i][0], item[0], item[1], item[2], item[3], item[4], label[i],
-    #                                                   predict[i])
-    #
-    # res_data = {'idx': idx, 'result': result, 'label': label, 'predict': predict}
+        content += '{},{},{},{},{},{},{},{}\n'.format(idx[i][0], item[0], item[1], item[2], item[3], item[4], label[i],
+                                                      predict[i])
+
+    res_data = {'idx': idx, 'result': result, 'label': label, 'predict': predict}
     print("accuracy is {}".format(right / length))
