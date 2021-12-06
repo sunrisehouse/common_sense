@@ -6,7 +6,6 @@ from utils import get_device
 from model import Model
 
 def train(args):
-    choice_num = args.choice_num
     batch_size = args.batch_size
     max_seq_length = args.max_seq_length
     drop_last = False

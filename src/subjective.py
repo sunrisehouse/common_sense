@@ -1,9 +1,29 @@
 from transformers import BertTokenizerFast
-from utils.predictor import Predictor
 from utils.data_loader_maker import DataLoaderMaker
 from model import Model
-from tqdm.autonotebook import tqdm
-def test(args):
+import torch
+from utils import clip_batch
+
+def subtask(self, dataloader,model, desc='Eval'):  # 주관식 코드
+    logits = []
+    for batch in dataloader:
+        batch = clip_batch(batch)
+        model.eval()
+        batch_labels = batch[4] if self.config.predict_dev else torch.zeros_like(batch[4])
+        with torch.no_grad():
+            _, _, _, logits = model(batch[0].cuda(),batch[1].cuda(),batch[2].cuda(),batch[3].cuda(),batch_labels.cuda())
+            logits.append(logits)
+    logits = torch.tensor(logits)
+    Answer_list = []#이거 만들어주시면 됩니다.
+    Answer = Answer_list[torch.argmax(logits)]
+    correct_answer = ''  # dataloader에서 타켓값 뽑아주시면됩니다.(정답)
+    Question = ''  # 마찬가지로 Question 뽑아주시면됩니다.
+    print(f"Question:{Question}\n")
+    print(f"correct_answer:{correct_answer}  model answer:{Answer}")
+    return Answer
+
+
+def subjective(args):
     choice_num = args.choice_num
     scorer_hidden = args.scorer_hidden
     version = args.model_version
@@ -21,7 +41,7 @@ def test(args):
     tokenizer = BertTokenizerFast.from_pretrained("kykim/albert-kor-base")
 
     data_loader_maker = DataLoaderMaker()
-    dataloader = data_loader_maker.make(
+    dataloader = data_loader_maker.make(#질문은 동일하고 엔터디만 다르게 들어갈 수 있는 데이터셋 필요
         test_data_path,
         tokenizer,
         batch_size,
@@ -35,16 +55,4 @@ def test(args):
 
     model = Model.from_pretrained(model_path, cache_dir=cache_dir, no_att_merge=no_att_merge, N_choices = choice_num, scorer_hidden = scorer_hidden, version = version).cuda()
 
-    predictor = Predictor()
-    idx, result, label, predict = predictor.predict(model, dataloader)
-    content = ''
-    length = len(result)
-    right = 0
-    for i, item in enumerate(tqdm(result)):
-        if predict[i] == label[i]:
-            right += 1
-    #     content += '{},{},{},{},{},{},{},{}\n'.format(idx[i][0], item[0], item[1], item[2], item[3], item[4], label[i],
-    #                                                   predict[i])
-    #
-    # res_data = {'idx': idx, 'result': result, 'label': label, 'predict': predict}
-    print("accuracy is {}".format(right / length))
+    answer = subtask(dataloader,model)
