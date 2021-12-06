@@ -12,7 +12,7 @@ def train(args):
     drop_last = False
     append_answer_text = args.append_answer_text
     append_descr = args.append_descr
-    append_tripple = False if args.append_descr == 0 else True
+    append_tripple = False if args.append_tripple == 0 else True
     gpu_ids = None
     if gpu_ids is None:
         n_gpus = torch.cuda.device_count()

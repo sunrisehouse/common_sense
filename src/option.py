@@ -25,7 +25,7 @@ def get_args():
     # Data parameters
     parser.add_argument('--append_answer_text', type=int, default=1, help='append answer choice to the question.')
     parser.add_argument('--append_descr', type=int, default=1, help='append QA related context description.')
-    parser.add_argument('--append_tripple', type=bool, default=1, help='appending triples so we use external Knowledge Graph.')
+    parser.add_argument('--append_tripple', type=int, default=1, help='appending triples so we can use external Knowledge Graph.')
 
     # Other parameters
     parser.add_argument('--print_step', type=int, default=2500)

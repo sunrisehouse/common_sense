@@ -52,7 +52,7 @@ class Model(AlbertPreTrainedModel):
     1. self.forward(input_ids, attention_mask, token_type_ids, label)
     2. self.predict(input_ids, attention_mask, token_type_ids)
     """
-    def __init__(self, config, no_att_merge=False, N_choices = 5, version = 1,scorer_hidden = 100):
+    def __init__(self, config, no_att_merge=False, N_choices = 5, version = 1, scorer_hidden = 100):
         super(Model, self).__init__(config)
         self.kbert = False
 
