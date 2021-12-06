@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, RandomSampler, TensorDataset
 import json
-from pdb import set_trace
+
 class korKGExample:
     def __init__(self, idx, choices, label = -1):
         self.idx = idx
@@ -31,7 +31,7 @@ class korKGExample:
     def load_from_json(cls, json_obj, append_answer_text=False, append_descr=0, append_triple=True):
         choices = json_obj['question']['choices']
         question_concept = json_obj['question']['question_concept']
-        set_trace()
+
         def mkinput(question_concept, choice):
             if choice['triple'] and append_triple:
                 triples = ' [SEP] '.join([' '.join(trip) for trip in choice['triple']])
