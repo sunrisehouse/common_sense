@@ -12,7 +12,7 @@ def test(args):
     drop_last = False
     append_answer_text = 1
     append_descr = 1
-    append_tripple = False if args.append_descr == 0 else True
+    append_tripple = False if args.append_tripple == 0 else True
     no_att_merge = False
     model_path = args.model_path
     test_data_path = args.test_data_path
