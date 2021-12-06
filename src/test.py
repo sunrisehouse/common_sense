@@ -10,8 +10,8 @@ def test(args):
     batch_size = args.batch_size
     max_seq_length = args.max_seq_length
     drop_last = False
-    append_answer_text = 1
-    append_descr = 1
+    append_answer_text = args.append_answer_text
+    append_descr = args.append_descr
     append_tripple = False if args.append_tripple == 0 else True
     no_att_merge = False
     model_path = args.model_path
