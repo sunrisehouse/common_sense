@@ -15,7 +15,6 @@ def subtask(self, dataloader,model, desc='Eval'):  # 주관식 코드
             all_ret = model(batch[0].cuda(),batch[1].cuda(),batch[2].cuda(),batch[3].cuda(),batch_labels.cuda())
             ret = all_ret[3]
             total_logits.extend(ret.cpu().numpy().tolist())
-            Answer_list.extend(batch[4].numpy().tolist())#이 부분 검토
     total_logits = torch.tensor(total_logits)
     Answer = Answer_list[torch.argmax(total_logits)]
     correct_answer = ''  # dataloader에서 타켓값 뽑아주시면됩니다.(정답)
