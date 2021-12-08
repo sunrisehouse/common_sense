@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, RandomSampler, TensorDataset
 import json
-
+from pdb import set_trace
 class korKGExample:
     def __init__(self, idx, choices, label = -1):
         self.idx = idx
@@ -36,11 +36,12 @@ class korKGExample:
             if choice['triple'] and append_triple:
                 triples = ' [SEP] '.join([' '.join(trip) for trip in choice['triple']])
                 first_triple = ' '.join(choice['triple'][0])
-                following_triple = ' [SEP] '.join([' '.join(trip) for trip in choice['triple'][1:]]) if len(choice['triple']) > 1 else None
+                following_triple = choice['triple'][0][1:] if len(choice['triple'][0]) > 1 else None
                 triples_temp = triples
             else:
                 triples_temp = question_concept + ' [SEP] ' + choice['text']
                 following_triple = None
+                first_triple = None
             if append_answer_text:
                 question_text = '{} {}'.format(json_obj['question']['stem'], choice['text'])
             else:
@@ -48,7 +49,6 @@ class korKGExample:
             if append_descr == 1:
                 context = json_obj['question']['context'][:200]
                 triples_temp = '{} [SEP] {} [SEP] {}'.format(first_triple, context, following_triple)
-            
             text = ' {} [SEP] {} '.format(question_text, triples_temp)
             return text
         
@@ -143,13 +143,12 @@ class Feature:
         assert len(segment_ids) == max_seq_length
 
         return cls(idx, input_ids, input_mask, segment_ids)
-
-from pdb import set_trace      
+    
 class DataLoaderMaker:
     def __init__(self):
         print("[data loader maker]")
     
-    def make(self, data_file_name, tokenizer, batch_size, drop_last, max_seq_length, append_answer_text, append_descr, append_triple, shuffle=True):
+    def make(self, data_file_name, tokenizer, batch_size, drop_last, max_seq_length, append_answer_text, append_descr, append_triple, shuffle=True, subjective = False):
         examples = self._load_data_korKG(
             data_file_name,
             append_answer_text=append_answer_text, 
@@ -163,8 +162,19 @@ class DataLoaderMaker:
         for i, example in enumerate(examples):
             features, la = example.fl(tokenizer, max_seq_length)
 
-            F.append(features)
-            L.append(la)
+            if subjective == False:
+                F.append(features)
+                L.append(la)
+            else:
+                tmp_set = []
+                for i, f in enumerate(features):
+                    if i % 10 == 0 and i != 0:
+                        F.append(tmp_set)
+                        L.append(la)
+                        tmp_set = []
+                        tmp_set.append(f)
+                    else:
+                        tmp_set.append(f)
 
         return self.convert_to_tensor((F, L), batch_size, drop_last, shuffle=shuffle)
     
