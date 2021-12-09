@@ -68,6 +68,6 @@ def subjective(args):
         subjective = True
     )
 
-    model = Model.from_pretrained("kykim/albert-kor-base", cache_dir=cache_dir, no_att_merge=no_att_merge, N_choices = choice_num, scorer_hidden = scorer_hidden, version = version).cuda()
-    #model_path
+    model = Model.from_pretrained(model_path, cache_dir=cache_dir, no_att_merge=no_att_merge, N_choices = choice_num, scorer_hidden = scorer_hidden, version = version).cuda()
+
     answer = subtask(dataloader,model, args)
