@@ -50,6 +50,21 @@ python3 src/main.py \
 
 ```
 
+### Subjective task
+
+```
+
+python3 src/main.py \
+    --mission=subjective \
+    --batch_size=1\
+    --model_version=1 \
+    --scorer_hidden=300 \
+    --test_data_path=./data/subjective_data.json \
+    --choice_num=10 \
+    --model_path=./Result/output \
+    --cache_dir=./Result/cache \
+
+```
 ### Make Data Loader
 
 ```python
