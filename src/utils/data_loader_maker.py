@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, RandomSampler, TensorDataset
 import json
-from pdb import set_trace
+
 class korKGExample:
     def __init__(self, idx, choices, label = -1):
         self.idx = idx
@@ -182,11 +182,6 @@ class DataLoaderMaker:
         tensors = []
 
         for item in data:
-            # item: (f, f, f, ...)
-            # item: ((f1, f2, f3), ...)
-            # item: (int, int, int, ...)
-            # item: ((int, int, int), ...)
-            # item: ((float, float, float), ...)
 
             if type(item[0]) is Feature:
                 _tensors = self._convert_feature_to_tensor(item)
