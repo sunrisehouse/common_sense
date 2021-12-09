@@ -1,29 +1,40 @@
 from transformers import BertTokenizerFast
 from utils.data_loader_maker import DataLoaderMaker
-from model import Model
+from model import Model_for_sub
 import torch
 from utils import clip_batch
 import json
-
-def subtask(self, dataloader, model, desc='Eval'):  # 주관식 코드
+import numpy as np
+def subtask(dataloader, model,tdp, desc='Eval'):  # 주관식 코드
     total_logits = []
     Correct_list = []
-    f = open(args.test_data_path, 'r')
+    f = open(tdp, 'r')
     sub_data = json.load(f)
     for data in sub_data: # 'subjective_data.json'에 있는 질문의 개수는 10개 입니다
-        Correct_list.append(data['question']['choices'][int(data[0]['answerKey'])-1]['text'])
+         Correct_list.append(data['question']['choices'][int(data['answerKey'])-1]['text'])
     f.close()
-    for batch in dataloader:
+    logits_list = []
+    cnt = 0
+    print('[subjective task]')
+    for i,batch in enumerate(dataloader):
         #지금 데이터로더에는 한 데이터셋 형태에 초이스가 10개씩 들어가고 한 질문에 있는 초이스 총 개수는 25380개입니다
         batch = clip_batch(batch)
         model.eval()
-        batch_labels = batch[4] if self.config.predict_dev else torch.zeros_like(batch[4])
+        batch_labels = batch[4] #if self.config.predict_dev else torch.zeros_like(batch[4])
+        cnt+=1
         with torch.no_grad():
-            all_ret = model(batch[0].cuda(),batch[1].cuda(),batch[2].cuda(),batch[3].cuda(),batch_labels.cuda())
-            ret = all_ret[3]
-            total_logits.extend(ret.cpu().numpy().tolist())
+            logits = model(batch[0].cuda(),batch[1].cuda(),batch[2].cuda(),batch[3].cuda(),batch_labels.cuda())
+            logits_list.extend(logits.cpu().numpy().tolist())
+        if (i+1)%2538==0:
+            total_logits.append(np.array(logits_list).flatten().tolist())
+            print(np.shape(total_logits))
+            logits_list = []
+    print("cnt:",cnt)
+    # total_logits.append(np.array(logits_list).flatten().tolist())
+    print(np.shape(total_logits))
     total_logits = torch.tensor(total_logits) # total_logit 형태가 (10, 25380)이라고 가정하겠습니다
-    predict_label = torch.argmax(total_logits)
+    predict_label = torch.argmax(total_logits,dim=1)
+    print(np.shape(predict_label))
     Answer = []
     for i, label in enumerate(predict_label):
         label = int(label)
@@ -31,8 +42,8 @@ def subtask(self, dataloader, model, desc='Eval'):  # 주관식 코드
         Answer.append(answer)
         correct_answer = Correct_list[i]
         Question = sub_data[i]['question']['stem']
-        print(f"Question:{Question}\n")
-        print(f"correct_answer:{correct_answer}  model answer:{answer}")
+        print(f"Question{i}:{Question}")
+        print(f"correct_answer:{correct_answer}  model answer:{answer}\n")
     return Answer
 
 
@@ -67,6 +78,6 @@ def subjective(args):
         subjective = True
     )
 
-    model = Model.from_pretrained(model_path, cache_dir=cache_dir, no_att_merge=no_att_merge, N_choices = choice_num, scorer_hidden = scorer_hidden, version = version).cuda()
+    model = Model_for_sub.from_pretrained(model_path, cache_dir=cache_dir, no_att_merge=no_att_merge, N_choices = choice_num, scorer_hidden = scorer_hidden, version = version).cuda()
 
-    answer = subtask(dataloader,model, args)
+    answer = subtask(dataloader=dataloader,model=model, tdp=test_data_path)

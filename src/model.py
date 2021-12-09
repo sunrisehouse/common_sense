@@ -10,6 +10,8 @@ from transformers import AlbertModel
 
 import math
 import logging
+import os
+os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
 class AttentionMerge(nn.Module):
     """
@@ -114,6 +116,7 @@ class Model(AlbertPreTrainedModel):
         """
 
         logits = self._forward(idx, input_ids, attention_mask, token_type_ids)
+        print(logits.shape)
         loss = F.cross_entropy(logits, labels)
 
         with torch.no_grad():
@@ -157,6 +160,114 @@ class Model(AlbertPreTrainedModel):
     def _to_tensor(self, it, device): 
         return torch.tensor(it, device=device, dtype=torch.float)
 
+
+class Model_for_sub(AlbertPreTrainedModel):
+    """
+    AlBert-AttentionMerge-Classifier
+
+    1. self.forward(input_ids, attention_mask, token_type_ids, label)
+    2. self.predict(input_ids, attention_mask, token_type_ids)
+    """
+
+    def __init__(self, config, no_att_merge=False, N_choices=5, version=1, scorer_hidden=100):
+        super(Model_for_sub, self).__init__(config)
+        self.kbert = False
+
+        if self.kbert:
+            self.albert = KBERT(config)
+        else:
+            self.albert = AlbertModel(config)
+
+        self.do_att_merge = not no_att_merge
+        self.att_merge = AttentionMerge(
+            config.hidden_size, 1024, 0.1) if self.do_att_merge else None
+
+        if version == 1:
+            self.scorer = nn.Sequential(
+                nn.Linear(config.hidden_size, scorer_hidden),
+                nn.BatchNorm1d(scorer_hidden),
+                nn.ReLU(),
+                nn.Dropout(0.3),
+                nn.Linear(scorer_hidden, 1),
+            )
+        elif version == 2:
+            self.scorer = nn.Sequential(
+                nn.Linear(config.hidden_size, scorer_hidden),
+                nn.BatchNorm1d(scorer_hidden),
+                nn.ReLU(),
+                nn.Dropout(0.5),
+                nn.BatchNorm1d(scorer_hidden),
+                nn.ReLU(),
+                nn.Dropout(0.5),
+                nn.Linear(scorer_hidden, 1),
+            )
+        elif version == 3:
+            self.scorer = nn.Sequential(
+                nn.Dropout(0.1),
+                nn.Linear(config.hidden_size, 1),
+            )
+
+        self.n_choices = N_choices
+
+        self.init_weights()
+        self.requires_grad = {}
+
+    def freeze_lm(self):
+        logger.info('freeze lm layers.')
+        for name, p in self.albert.named_parameters():
+            self.requires_grad[p] = p.requires_grad
+            p.requires_grad = False
+
+    def unfreeze_lm(self):
+        logger.info('unfreeze lm layers.')
+        for name, p in self.albert.named_parameters():
+            p.requires_grad = self.requires_grad[p]
+
+    def forward(self, idx, input_ids, attention_mask, token_type_ids, labels):
+        """
+        input_ids: [B, N_choices, L]
+        labels: [B, ]
+        """
+
+        logits = self._forward(idx, input_ids, attention_mask, token_type_ids)
+
+        with torch.no_grad():
+            logits = F.softmax(logits, dim=1)
+        return logits
+
+    def _forward(self, idx, input_ids, attention_mask, token_type_ids):
+        # [B, 2, L] => [B*2, L]
+        flat_input_ids = input_ids.view(-1, input_ids.size(-1))
+        flat_attention_mask = attention_mask.view(-1, attention_mask.size(-1))
+        flat_token_type_ids = token_type_ids.view(-1, token_type_ids.size(-1))
+
+        outputs = self.albert(
+            input_ids=flat_input_ids,
+            attention_mask=flat_attention_mask,
+            token_type_ids=flat_token_type_ids
+        )
+
+        if self.kbert:
+            flat_attention_mask = self.albert.get_attention_mask()
+
+        if self.do_att_merge:
+            h12 = self.att_merge(outputs[0], flat_attention_mask)
+        else:
+            h12 = outputs[0][:, 0, :]
+
+        logits = self.scorer(h12).view(-1, self.n_choices)
+        logits = F.softmax(logits, dim=1)
+
+        return logits
+
+    def predict(self, idx, input_ids, attention_mask, token_type_ids):
+        """
+        return: [B, N_choices]
+        """
+        return self._forward(idx, input_ids, attention_mask, token_type_ids)
+
+    def _to_tensor(self, it, device):
+        return torch.tensor(it, device=device, dtype=torch.float)
 
 
 

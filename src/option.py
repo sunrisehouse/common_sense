@@ -8,7 +8,7 @@ def get_args():
     parser.add_argument('--scorer_hidden', type=int, default=100)
     parser.add_argument('--model_version', type=int, default=1)
     parser.add_argument('--lr', type=float, default=1e-5)
-    parser.add_argument('--batch_size', type=int, default=4)
+    parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--num_train_epochs', type=int, default=10)
     parser.add_argument('--warmup_proportion', type=float, default=0.1)
     parser.add_argument('--weight_decay', type=float, default=0.15)
