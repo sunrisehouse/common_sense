@@ -116,7 +116,6 @@ class Model(AlbertPreTrainedModel):
         """
 
         logits = self._forward(idx, input_ids, attention_mask, token_type_ids)
-        print(logits.shape)
         loss = F.cross_entropy(logits, labels)
 
         with torch.no_grad():

@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, RandomSampler, TensorDataset
 import json
-from pdb import set_trace
+
 class korKGExample:
     def __init__(self, idx, choices, label = -1):
         self.idx = idx
@@ -167,15 +167,18 @@ class DataLoaderMaker:
                 L.append(la)
             else:
                 tmp_set = []
+                inner_batch_size = 20
                 for i, f in enumerate(features):
-                    if i % 20 == 0 and i != 0:
+                    if i % inner_batch_size == 0 and i != 0:
                         F.append(tmp_set)
                         L.append(la)
                         tmp_set = []
                         tmp_set.append(f)
                     else:
                         tmp_set.append(f)
-
+                if len(tmp_set) == inner_batch_size:
+                    F.append(tmp_set)
+                    L.append(la)
         return self.convert_to_tensor((F, L), batch_size, drop_last, shuffle=shuffle)
     
     def convert_to_tensor(self, data, batch_size, drop_last, shuffle):
