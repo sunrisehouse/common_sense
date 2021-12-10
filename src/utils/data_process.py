@@ -289,7 +289,7 @@ class Kor_QA():
         with open('../../data/korqa_test_5.json', 'r') as f:
             test_squad = json.load(f)
         f.close()
-        test_squad = test_squad[:10]
+        test_squad = test_squad[10:20]
         new_test_squad = []
 
         for i ,data in enumerate(test_squad):
