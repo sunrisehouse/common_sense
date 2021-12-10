@@ -168,7 +168,7 @@ class DataLoaderMaker:
             else:
                 tmp_set = []
                 for i, f in enumerate(features):
-                    if i % 10 == 0 and i != 0:
+                    if i % 20 == 0 and i != 0:
                         F.append(tmp_set)
                         L.append(la)
                         tmp_set = []

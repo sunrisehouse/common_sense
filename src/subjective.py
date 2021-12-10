@@ -14,13 +14,14 @@ def subtask(dataloader, model,tdp, desc='Eval'):  # 주관식 코드
          Correct_list.append(data['question']['choices'][int(data['answerKey'])-1]['text'])
     f.close()
     logits_list = []
-    cnt = 0
+    k = 5
+    cnt =0
     print('[subjective task]')
     for i,batch in enumerate(dataloader):
         #지금 데이터로더에는 한 데이터셋 형태에 초이스가 10개씩 들어가고 한 질문에 있는 초이스 총 개수는 25380개입니다
         batch = clip_batch(batch)
         model.eval()
-        batch_labels = batch[4] #if self.config.predict_dev else torch.zeros_like(batch[4])
+        batch_labels = batch[4]
         cnt+=1
         with torch.no_grad():
             logits = model(batch[0].cuda(),batch[1].cuda(),batch[2].cuda(),batch[3].cuda(),batch_labels.cuda())
@@ -29,19 +30,16 @@ def subtask(dataloader, model,tdp, desc='Eval'):  # 주관식 코드
             total_logits.append(np.array(logits_list).flatten().tolist())
             print(np.shape(total_logits))
             logits_list = []
-    print("cnt:",cnt)
-    # total_logits.append(np.array(logits_list).flatten().tolist())
-    print(np.shape(total_logits))
     total_logits = torch.tensor(total_logits) # total_logit 형태가 (10, 25380)이라고 가정하겠습니다
-    predict_label = torch.argmax(total_logits,dim=1)
-    print(np.shape(predict_label))
+    predict_label = torch.topk(total_logits,k=k,dim=1,)[1]
     Answer = []
-    for i, label in enumerate(predict_label):
-        label = int(label)
-        answer = sub_data[i]['question']['choices'][label]['text']
-        Answer.append(answer)
-        correct_answer = Correct_list[i]
-        Question = sub_data[i]['question']['stem']
+    for i, labels in enumerate(predict_label):
+        for label in labels:
+            label = int(label)
+            answer = sub_data[i]['question']['choices'][label]['text']
+            Answer.append(answer)
+            correct_answer = Correct_list[i]
+            Question = sub_data[i]['question']['stem']
         print(f"Question{i}:{Question}")
         print(f"correct_answer:{correct_answer}  model answer:{answer}\n")
     return Answer
