@@ -25,7 +25,7 @@ def subtask(dataloader, model,tdp, desc='Eval'):  # 주관식 코드
         with torch.no_grad():
             logits = model(batch[0].cuda(),batch[1].cuda(),batch[2].cuda(),batch[3].cuda(),batch_labels.cuda())
             logits_list.extend(logits.cpu().numpy().tolist())
-        if (i+1)%(2538*2)==0:
+        if (i+1)%(2538/2)==0:
             total_logits.append(np.array(logits_list).flatten().tolist())
             print(np.shape(total_logits))
             logits_list = []
