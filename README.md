@@ -8,9 +8,9 @@
 
 python3 src/main.py \
     --mission=train \
-    --train_data_path=./data/korqa_train_15.json \
-    --dev_data_path=./data/korqa_dev_15.json \
-    --choice_num=15 \
+    --train_data_path=./data/korqa_train_10.json \
+    --dev_data_path=./data/korqa_dev_10.json \
+    --choice_num=10 \
     --model_version=1 \
     --scorer_hidden=100 \
     --output_model_dir=./Result/output \
@@ -24,9 +24,9 @@ python3 src/main.py \
 
 python3 src/main.py \
     --mission=train \
-    --train_data_path=./data/korqa_train_15.json \
-    --dev_data_path=./data/korqa_dev_15.json \
-    --choice_num=15 \
+    --train_data_path=./data/korqa_train_10.json \
+    --dev_data_path=./data/korqa_dev_10.json \
+    --choice_num=10 \
     --model_version=1 \
     --scorer_hidden=100 \
     --model_path=./Result/output \
@@ -43,8 +43,8 @@ python3 src/main.py \
     --mission=test \
     --model_version=1 \
     --scorer_hidden=100 \
-    --test_data_path=./data/korqa_test_15.json \
-    --choice_num=15 \
+    --test_data_path=./data/korqa_test_10.json \
+    --choice_num=10 \
     --model_path=./Result/output \
     --cache_dir=./Result/cache \
 
@@ -58,7 +58,7 @@ python3 src/main.py \
     --mission=subjective \
     --batch_size=1\
     --model_version=1 \
-    --scorer_hidden=300 \
+    --scorer_hidden=100 \
     --test_data_path=./data/subjective_data.json \
     --choice_num=10 \
     --model_path=./Result/output \
