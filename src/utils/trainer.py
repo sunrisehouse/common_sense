@@ -2,7 +2,6 @@ from tqdm.autonotebook import tqdm
 import torch
 from transformers.optimization import AdamW
 from transformers.optimization import get_cosine_with_hard_restarts_schedule_with_warmup
-from transformers.file_utils import WEIGHTS_NAME, CONFIG_NAME
 from torch.utils.tensorboard import SummaryWriter
 from . import Vn, clip_batch, mkdir_if_notexist
 
