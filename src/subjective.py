@@ -1,6 +1,6 @@
 from transformers import BertTokenizerFast
 from utils.data_loader_maker import DataLoaderMaker
-from model import Model_for_sub
+from model import ModelForSub
 import torch
 from utils import clip_batch
 import json
@@ -79,6 +79,6 @@ def subjective(args):
         subjective = True
     )
 
-    model = Model_for_sub.from_pretrained(model_path, cache_dir=cache_dir, no_att_merge=no_att_merge, N_choices = choice_num, scorer_hidden = scorer_hidden, version = version).cuda()
+    model = ModelForSub.from_pretrained(model_path, cache_dir=cache_dir, no_att_merge=no_att_merge, N_choices = choice_num, scorer_hidden = scorer_hidden, version = version).cuda()
 
     answer = subtask(dataloader=dataloader,model=model, tdp=test_data_path)

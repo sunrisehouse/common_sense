@@ -157,7 +157,7 @@ class Model(AlbertPreTrainedModel):
         return torch.tensor(it, device=device, dtype=torch.float)
 
 
-class Model_for_sub(AlbertPreTrainedModel):
+class ModelForSub(AlbertPreTrainedModel):
     """
     AlBert-AttentionMerge-Classifier
 
@@ -166,7 +166,7 @@ class Model_for_sub(AlbertPreTrainedModel):
     """
 
     def __init__(self, config, no_att_merge=False, N_choices=5, version=1, scorer_hidden=100):
-        super(Model_for_sub, self).__init__(config)
+        super(ModelForSub, self).__init__(config)
         self.kbert = False
 
         self.albert = AlbertModel(config)
