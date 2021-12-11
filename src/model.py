@@ -58,10 +58,7 @@ class Model(AlbertPreTrainedModel):
         super(Model, self).__init__(config)
         self.kbert = False
 
-        if self.kbert:
-            self.albert = KBERT(config)
-        else:
-            self.albert = AlbertModel(config)            
+        self.albert = AlbertModel(config)            
 
         self.do_att_merge = not no_att_merge
         self.att_merge = AttentionMerge(
@@ -172,10 +169,7 @@ class Model_for_sub(AlbertPreTrainedModel):
         super(Model_for_sub, self).__init__(config)
         self.kbert = False
 
-        if self.kbert:
-            self.albert = KBERT(config)
-        else:
-            self.albert = AlbertModel(config)
+        self.albert = AlbertModel(config)
 
         self.do_att_merge = not no_att_merge
         self.att_merge = AttentionMerge(
